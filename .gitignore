@@ -397,3 +397,4 @@ cython_debug/
 
 /.history
 .history
+.env
