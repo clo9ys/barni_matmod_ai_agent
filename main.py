@@ -2,6 +2,7 @@ import uuid
 from rich.console import Console
 from rich.panel import Panel
 from rich.status import Status
+from rich.prompt import Prompt, Confirm
 from rich.table import Table
 from src.core.state import (
     ResearchState,
@@ -14,85 +15,110 @@ from src.core.state import (
 console = Console()
 
 
-def run_pipeline():
-    # инициализация сессии и стартового запроса
-    console.print(Panel.fit("ai-ассистент нцсэд: запуск исследовательского цикла", style="bold blue"))
+def process_definition_step(state: ResearchState):
+    # шаг 2: имитация логики уточнения запроса
+    while True:
+        with Status("[bold yellow]шаг 2: формализация запроса...", spinner="dots"):
+            state.add_trace(f"анализ интента: {state.query}")
 
-    query = console.input("[bold green]запрос:[/bold green] ")
-    if not query:
-        query = "динамика ввп стран брикс за 2015-2024 годы"  # дефолтный запрос для теста
+            # имитируем логику: если запрос слишком короткий, требуем уточнения
+            if len(state.query.split()) < 3:
+                state.add_trace("запрос слишком абстрактный")
+                is_ambiguous = True
+            else:
+                is_ambiguous = False
+                state.definition = ResearchDefinition(
+                    geography="выбрано на основе запроса",
+                    time_period="2020-2024",
+                    disciplinary_focus="экономика",
+                    research_questions=["основной индикатор", "динамика изменений"]
+                )
 
-    state = ResearchState(
-        session_id=str(uuid.uuid4()),
-        query=query,
-        generated_script=None,
-        final_dataset_url=None,
-    )
+        if is_ambiguous:
+            console.print("[bold red]система:[/bold red] ваш запрос слишком общий. уточните географию или период.")
+            state.query = Prompt.ask("[bold green]уточнение[/bold green]")
+            state.add_trace(f"получено уточнение: {state.query}")
+            continue  # идем на повторный круг анализа
+        else:
+            state.add_trace("параметры исследования формализованы")
+            return True
 
-    # шаг 2: определение исследования (пока заглушка)
-    with Status("[bold yellow]шаг 2: формализация запроса...", spinner="dots"):
-        state.add_trace("анализ интента пользователя")
-        state.definition = ResearchDefinition(
-            geography="страны брикс (бразилия, россия, индия, китай, юар)",
-            time_period="2015-2024",
-            disciplinary_focus="макроэкономика",
-            research_questions=["как изменился суммарный ввп?", "кто лидер роста?"]
-        )
-        state.add_trace("параметры исследования определены")
 
-    _render_artifact("определение исследования", state.definition.dict())
-
-    # шаг 3: дизайн исследования
-    with Status("[bold yellow]шаг 3: проектирование гипотез...", spinner="dots"):
-        state.add_trace("формулировка гипотез и выбор индикаторов")
-        state.design = ResearchDesign(
-            hypotheses=["ввп китая растет быстрее остальных стран блока"],
-            indicators=["gdp (current usd)", "gdp growth (annual %)"],
-            grouping_methods="агрегация по годам и странам"
-        )
-
-    _render_artifact("дизайн исследования", state.design.dict())
-
-    # шаг 5: поиск источников (имитация рага)
+def process_search_step(state: ResearchState):
+    # шаг 5: поиск с ветвлением при отсутствии данных
     with Status("[bold yellow]шаг 5: поиск данных в реестре...", spinner="dots"):
-        state.add_trace("запрос к векторной базе faiss")
-        mock_source = DataSource(
-            id="ds_001",
-            title="world bank macroeconomics data",
-            source_url="https://repository.nsedc.ru/wb_data",
-            relevance_score=0.98,
-            description="основные макропоказатели по странам мира"
-        )
-        state.assembly_plan = AssemblyPlan(
-            sources=[mock_source],
-            plan_description="извлечение ввп через api мирового банка"
-        )
-        state.add_trace(f"найден подходящий источник: {mock_source.title}")
+        state.add_trace("поиск в faiss по метаданным")
+        # имитация: если в запросе есть 'ошибка', данных не найдем
+        if "ошибка" in state.query.lower():
+            found = []
+        else:
+            found = [DataSource(
+                id="ds_1", title="тестовый датасет", source_url="http://nsedc.ru",
+                relevance_score=0.9, description="описание"
+            )]
 
-    _render_artifact("план сборки и источники", state.assembly_plan.dict())
+    if not found:
+        state.add_trace("данные не найдены в реестре")
+        console.print(
+            Panel("[bold red]внимание:[/bold red] по вашему запросу нет данных в верифицированных источниках.",
+                  border_style="red"))
 
-    # финальный вывод следа ассистента
+        if Confirm.ask("хотите изменить параметры поиска?"):
+            state.add_trace("пользователь решил изменить параметры")
+            return "retry"  # ветвление: возврат назад
+        else:
+            state.add_trace("завершение работы из-за отсутствия данных")
+            return "stop"
+
+    state.assembly_plan = AssemblyPlan(sources=found, plan_description="план сборки готов")
+    state.add_trace(f"найдено источников: {len(found)}")
+    return "success"
+
+
+def run_pipeline():
+    console.print(Panel.fit("ai-ассистент нцсэд: гибридный пайплайн", style="bold blue"))
+
+    query = Prompt.ask("[bold green]введите ваш запрос[/bold green]")
+    state = ResearchState(session_id=str(uuid.uuid4()), query=query)
+
+    # запуск этапов с логикой переходов
+    if not process_definition_step(state):
+        return
+
+    _render_artifact("шаг 2: формализация", state.definition.dict())
+
+    # шаг 3: дизайн (пропускаем для краткости, тут логика линейная)
+    state.design = ResearchDesign(hypotheses=["тест"], indicators=["ввп"], grouping_methods="страны")
+    _render_artifact("шаг 3: дизайн", state.design.dict())
+
+    # шаг 5: поиск и выбор пути
+    search_result = process_search_step(state)
+
+    if search_result == "retry":
+        # пример ветвления: возвращаемся на ввод запроса
+        return run_pipeline()
+    elif search_result == "stop":
+        _render_trace(state.trace)
+        return
+
+    _render_artifact("шаг 5: поиск данных", state.assembly_plan.dict())
+
+    # финальный вывод
     _render_trace(state.trace)
 
 
 def _render_artifact(title: str, data: dict):
-    # вспомогательная функция для отрисовки блоков данных
     table = Table(show_header=False, box=None)
     for key, value in data.items():
         table.add_row(f"[bold cyan]{key}:[/bold cyan]", str(value))
-
     console.print(Panel(table, title=f"[bold white]{title}[/bold white]", border_style="green"))
 
 
 def _render_trace(trace: list):
-    # отрисовка логов (след ассистента)
     console.print("\n[bold]след ассистента:[/bold]")
     for i, message in enumerate(trace, 1):
         console.print(f"  [dim]{i}. {message}[/dim]")
 
 
 if __name__ == "__main__":
-    try:
-        run_pipeline()
-    except KeyboardInterrupt:
-        console.print("\n[red]работа прервана пользователем[/red]")
+    run_pipeline()
