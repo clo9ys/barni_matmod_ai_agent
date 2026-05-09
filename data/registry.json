@@ -1,0 +1,13 @@
+[
+  {
+    "id": "brics_gdp_001",
+    "title": "динамика ввп стран брикс",
+    "description": "данные по ежегодному ввп бразилии, россии, индии, китая и юар",
+    "source": "world bank",
+    "geography": "брикс",
+    "period": "2015-2024",
+    "columns": ["year", "country", "gdp"],
+    "file_path": "data/raw/brics_gdp.parquet",
+    "tags": ["ввп", "брикс", "экономика"]
+  }
+]
