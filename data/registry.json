@@ -1,0 +1,309 @@
+[
+  {
+    "id": "world_bank_gdp_current_usd",
+    "title": "GDP, current US$",
+    "description": "Gross domestic product by country in current US dollars. Useful for comparing economic size across countries and over time.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/NY.GDP.MKTP.CD",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1960, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "GDP", "code": "NY.GDP.MKTP.CD", "unit": "current US$" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["gdp", "ввп", "economy", "world bank", "countries"]
+  },
+  {
+    "id": "world_bank_gdp_growth",
+    "title": "GDP growth, annual %",
+    "description": "Annual percentage growth rate of GDP at market prices based on constant local currency.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1961, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "GDP growth", "code": "NY.GDP.MKTP.KD.ZG", "unit": "annual %" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["gdp", "growth", "ввп", "рост экономики", "world bank"]
+  },
+  {
+    "id": "world_bank_inflation_cpi",
+    "title": "Inflation, consumer prices, annual %",
+    "description": "Inflation measured by the consumer price index. Useful for analysis of price dynamics and real indicators.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1960, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Inflation", "code": "FP.CPI.TOTL.ZG", "unit": "annual %" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["inflation", "инфляция", "cpi", "prices", "world bank"]
+  },
+  {
+    "id": "world_bank_unemployment_total",
+    "title": "Unemployment, total, % of total labor force",
+    "description": "Unemployment as a percentage of the total labor force, modeled ILO estimate.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1991, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Unemployment", "code": "SL.UEM.TOTL.ZS", "unit": "% of total labor force" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["unemployment", "безработица", "labor", "world bank"]
+  },
+  {
+    "id": "world_bank_population_total",
+    "title": "Population, total",
+    "description": "Total population by country. Useful as a denominator for per capita indicators.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/SP.POP.TOTL",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1960, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Population", "code": "SP.POP.TOTL", "unit": "people" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["population", "население", "demography", "world bank"]
+  },
+  {
+    "id": "world_bank_fertility_rate",
+    "title": "Fertility rate, total",
+    "description": "Total fertility rate, births per woman. Useful for demographic and social research.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/SP.DYN.TFRT.IN",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1960, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Fertility rate", "code": "SP.DYN.TFRT.IN", "unit": "births per woman" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["fertility", "рождаемость", "demography", "births", "world bank"]
+  },
+  {
+    "id": "world_bank_urban_population_share",
+    "title": "Urban population, % of total population",
+    "description": "Share of population living in urban areas. Useful for studying urbanization and social indicators.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/SP.URB.TOTL.IN.ZS",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1960, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Urban population share", "code": "SP.URB.TOTL.IN.ZS", "unit": "% of total population" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["urbanization", "урбанизация", "population", "world bank"]
+  },
+  {
+    "id": "world_bank_exports_goods_services",
+    "title": "Exports of goods and services, current US$",
+    "description": "Exports of goods and services by country in current US dollars.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/NE.EXP.GNFS.CD",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1960, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Exports of goods and services", "code": "NE.EXP.GNFS.CD", "unit": "current US$" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["exports", "экспорт", "trade", "world bank"]
+  },
+  {
+    "id": "world_bank_imports_goods_services",
+    "title": "Imports of goods and services, current US$",
+    "description": "Imports of goods and services by country in current US dollars.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/NE.IMP.GNFS.CD",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1960, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Imports of goods and services", "code": "NE.IMP.GNFS.CD", "unit": "current US$" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["imports", "импорт", "trade", "world bank"]
+  },
+  {
+    "id": "world_bank_gdp_per_capita",
+    "title": "GDP per capita, current US$",
+    "description": "GDP per capita by country in current US dollars. Useful for comparing economic development levels.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/NY.GDP.PCAP.CD",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1960, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "GDP per capita", "code": "NY.GDP.PCAP.CD", "unit": "current US$" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["gdp per capita", "ввп на душу населения", "income", "world bank"]
+  },
+  {
+    "id": "world_bank_co2_emissions_per_capita",
+    "title": "CO2 emissions, metric tons per capita",
+    "description": "Carbon dioxide emissions per capita. Useful for environmental and socio-economic comparisons.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/EN.ATM.CO2E.PC",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1960, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "CO2 emissions per capita", "code": "EN.ATM.CO2E.PC", "unit": "metric tons per capita" }
+    ],
+    "dimensions": ["country", "year"],
+    "format": "api",
+    "availability": "api",
+    "tags": ["co2", "экология", "environment", "emissions", "world bank"]
+  },
+  {
+    "id": "rosstat_real_disposable_income_index",
+    "title": "Real disposable income index of Russian population",
+    "description": "Real disposable monetary income of the population in Russia. Useful for welfare dynamics and inflation-adjusted income analysis.",
+    "source": "Rosstat",
+    "source_url": "https://rosstat.gov.ru/folder/13397",
+    "geography": ["Russia"],
+    "time_period": { "start": 1995, "end": 2025 },
+    "frequency": "annual, quarterly",
+    "indicators": [
+      { "name": "Real disposable income index", "code": "rosstat_real_income_index", "unit": "index or % to previous period" }
+    ],
+    "dimensions": ["year", "quarter"],
+    "format": "web, xlsx",
+    "availability": "external",
+    "tags": ["income", "real income", "доходы", "реальные доходы", "росстат", "inflation adjusted"]
+  },
+  {
+    "id": "rosstat_cpi_russia",
+    "title": "Consumer price index in Russia",
+    "description": "Consumer price index and inflation indicators for Russia. Useful for price dynamics and real value calculations.",
+    "source": "Rosstat",
+    "source_url": "https://rosstat.gov.ru/statistics/price",
+    "geography": ["Russia"],
+    "time_period": { "start": 1991, "end": 2025 },
+    "frequency": "monthly, annual",
+    "indicators": [
+      { "name": "Consumer price index", "code": "rosstat_cpi", "unit": "% to previous period, index" }
+    ],
+    "dimensions": ["year", "month", "goods_group"],
+    "format": "web, xlsx",
+    "availability": "external",
+    "tags": ["cpi", "инфляция", "индекс потребительских цен", "росстат", "prices"]
+  },
+  {
+    "id": "rosstat_grdp_regions",
+    "title": "Gross regional product of Russian regions",
+    "description": "Gross regional product by Russian federal subjects. Useful for regional economic analysis.",
+    "source": "Rosstat",
+    "source_url": "https://rosstat.gov.ru/folder/210/document/13204",
+    "geography": ["Russia", "Russian regions"],
+    "time_period": { "start": 1998, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Gross regional product", "code": "rosstat_grdp", "unit": "million rubles" }
+    ],
+    "dimensions": ["region", "year"],
+    "format": "web, xlsx",
+    "availability": "external",
+    "tags": ["grp", "grdp", "врп", "регионы", "росстат"]
+  },
+  {
+    "id": "rosstat_population_regions",
+    "title": "Population of Russian regions",
+    "description": "Population by Russian federal subjects. Useful for regional per capita indicators.",
+    "source": "Rosstat",
+    "source_url": "https://rosstat.gov.ru/folder/12781",
+    "geography": ["Russia", "Russian regions"],
+    "time_period": { "start": 1990, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Population", "code": "rosstat_region_population", "unit": "people" }
+    ],
+    "dimensions": ["region", "year"],
+    "format": "web, xlsx",
+    "availability": "external",
+    "tags": ["population", "население", "регионы", "росстат", "demography"]
+  },
+  {
+    "id": "wto_merchandise_trade",
+    "title": "Merchandise trade values",
+    "description": "Merchandise exports and imports by reporting economy and partner. Useful for bilateral trade analysis.",
+    "source": "World Trade Organization",
+    "source_url": "https://stats.wto.org/",
+    "geography": ["world", "countries", "trade partners"],
+    "time_period": { "start": 1948, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Merchandise exports", "code": "wto_merchandise_exports", "unit": "US dollars" },
+      { "name": "Merchandise imports", "code": "wto_merchandise_imports", "unit": "US dollars" }
+    ],
+    "dimensions": ["reporter", "partner", "year", "product_group"],
+    "format": "api, csv",
+    "availability": "api",
+    "tags": ["trade", "товарооборот", "экспорт", "импорт", "wto", "bilateral trade"]
+  },
+  {
+    "id": "un_comtrade_bilateral_trade",
+    "title": "UN Comtrade bilateral trade data",
+    "description": "Detailed international trade data by reporter, partner, commodity and year. Useful for country-to-country trade turnover tasks.",
+    "source": "UN Comtrade",
+    "source_url": "https://comtradeplus.un.org/",
+    "geography": ["world", "countries", "trade partners"],
+    "time_period": { "start": 1962, "end": 2025 },
+    "frequency": "annual, monthly",
+    "indicators": [
+      { "name": "Trade value", "code": "trade_value", "unit": "US dollars" }
+    ],
+    "dimensions": ["reporter", "partner", "year", "commodity_code", "flow"],
+    "format": "api, csv",
+    "availability": "api",
+    "tags": ["trade", "товарооборот", "comtrade", "exports", "imports", "bilateral"]
+  },
+  {
+    "id": "unesco_education_expenditure",
+    "title": "Government expenditure on education",
+    "description": "Education expenditure indicators by country. Useful for social and human capital research.",
+    "source": "UNESCO Institute for Statistics",
+    "source_url": "https://uis.unesco.org/",
+    "geography": ["world", "countries"],
+    "time_period": { "start": 1970, "end": 2025 },
+    "frequency": "annual",
+    "indicators": [
+      { "name": "Government expenditure on education", "code": "unesco_education_expenditure", "unit": "% of GDP or national currency" }
+    ],
+    "dimensions": ["country", "year", "education_level"],
+    "format": "api, csv",
+    "availability": "api",
+    "tags": ["education", "образование", "expenditure", "unesco", "human capital"]
+  }
+]
