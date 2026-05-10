@@ -7,6 +7,24 @@ export default function Auth({ onLogin }) {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Вспомогательная функция для логина, чтобы не дублировать код
+    const loginUser = async (user, pass) => {
+        const formData = new URLSearchParams();
+        formData.append('username', user);
+        formData.append('password', pass);
+
+        const res = await fetch('http://localhost:8000/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!res.ok) throw new Error('Неверный логин или пароль');
+
+        const data = await res.json();
+        onLogin(data.access_token); // Передаем токен наверх в App.jsx
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -14,37 +32,22 @@ export default function Auth({ onLogin }) {
 
         try {
             if (isLoginMode) {
-                // Логин (FastAPI OAuth2PasswordRequestForm ждет FormData)
-                const formData = new URLSearchParams();
-                formData.append('username', username);
-                formData.append('password', password);
-
-                const res = await fetch('http://localhost:8000/api/v1/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: formData.toString()
-                });
-
-                if (!res.ok) throw new Error('Неверный логин или пароль');
-
-                const data = await res.json();
-                onLogin(data.access_token); // Передаем токен наверх
+                // Обычный вход
+                await loginUser(username, password);
             } else {
-                // Регистрация (в твоем бэке она сделана через query параметры)
+                // Регистрация
                 const res = await fetch(`http://localhost:8000/api/v1/auth/register?username=${username}&password=${password}`, {
                     method: 'POST'
                 });
 
                 if (!res.ok) throw new Error('Пользователь уже существует');
 
-                // Если регистрация успешна, сразу переключаем на форму входа
-                setIsLoginMode(true);
-                setError('Регистрация успешна! Теперь войдите.');
+                // Если регистрация успешна (200 OK), сразу же логиним пользователя!
+                await loginUser(username, password);
             }
         } catch (err) {
             setError(err.message);
-        } finally {
-            setLoading(false);
+            setLoading(false); // Выключаем загрузку только если была ошибка
         }
     };
 
@@ -70,14 +73,17 @@ export default function Auth({ onLogin }) {
                         required
                     />
 
-                    {error && <div className={`auth-error ${error.includes('успешна') ? 'success' : ''}`}>{error}</div>}
+                    {error && <div className="auth-error">{error}</div>}
 
-                    <button type="submit" className="btn-primary" disabled={loading}>
+                    <button type="submit" className="btn-primary auth-submit-btn" disabled={loading}>
                         {loading ? 'Загрузка...' : (isLoginMode ? 'Войти' : 'Зарегистрироваться')}
                     </button>
                 </form>
 
-                <p className="auth-switch" onClick={() => setIsLoginMode(!isLoginMode)}>
+                <p className="auth-switch" onClick={() => {
+                    setIsLoginMode(!isLoginMode);
+                    setError(''); // Очищаем ошибки при переключении режима
+                }}>
                     {isLoginMode ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войти'}
                 </p>
             </div>

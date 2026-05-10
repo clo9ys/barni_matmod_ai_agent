@@ -510,3 +510,17 @@ body {
 .auth-switch:hover {
     text-decoration: underline;
 }
+
+
+/* Увеличенная кнопка в форме авторизации */
+.auth-submit-btn {
+    padding: 16px !important; /* Увеличиваем высоту */
+    font-size: 1.1rem !important; /* Делаем текст крупнее */
+    font-weight: 600;
+    margin-top: 10px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.auth-submit-btn:active {
+    transform: scale(0.98); /* Легкий эффект нажатия */
+}
