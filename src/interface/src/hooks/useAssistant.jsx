@@ -2,20 +2,51 @@ import { useState, useCallback } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 export function useAssistant(token) {
-    const [currentStep, setCurrentStep] = useState(0);
+    const [currentStep, setCurrentStep] = useState(0); // Прогресс агента
+    const [viewStep, setViewStep] = useState(0);       // Что видит пользователь
     const [logs, setLogs] = useState([{ text: 'Ожидание запроса...', type: 'dimmed' }]);
-    const [artifactData, setArtifactData] = useState(null);
+    const [artifacts, setArtifacts] = useState({});   // Объект: { шаг: данные }
     const [isProcessing, setIsProcessing] = useState(false);
+    const [initialQuery, setInitialQuery] = useState('');
+
+    // Функция для загрузки старого исследования из истории
+    const loadResearch = useCallback(async (sessionId) => {
+        setIsProcessing(true);
+        try {
+            const res = await fetch(`http://localhost:8000/api/v1/research/${sessionId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            setInitialQuery(data.query);
+            setCurrentStep(data.current_step);
+            setViewStep(1); // Показываем первый результат
+
+            // Мапим данные из БД в формат артефактов
+            setArtifacts({
+                1: data.definition,
+                2: data.design,
+                3: data.structure,
+                4: data.assembly_plan
+            });
+            setLogs([{ text: 'История загружена', type: 'dimmed' }]);
+        } catch (e) {
+            console.error("Ошибка загрузки истории", e);
+        } finally {
+            setIsProcessing(false);
+        }
+    }, [token]);
 
     const sendMessage = useCallback(async (message) => {
         if (!message.trim()) return;
-
         setIsProcessing(true);
-        setLogs([{ text: 'Авторизация и запуск задачи...', type: 'normal' }]);
-        setArtifactData(null);
+        setInitialQuery(message);
+        setArtifacts({});
+        setCurrentStep(0);
+        setViewStep(0);
+        setLogs([{ text: 'Запуск задачи...', type: 'normal' }]);
 
         try {
-            // Шаг 1: Запуск задачи (POST)
             const response = await fetch('http://localhost:8000/api/v1/chat', {
                 method: 'POST',
                 headers: {
@@ -24,53 +55,33 @@ export function useAssistant(token) {
                 },
                 body: JSON.stringify({ query: message })
             });
-
-            if (!response.ok) throw new Error('Ошибка авторизации или запуска');
-
             const { task_id } = await response.json();
 
-            // Шаг 2: Подключение к стриму (SSE) через fetch-event-source
             await fetchEventSource(`http://localhost:8000/api/v1/stream/${task_id}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 onmessage(msg) {
                     const data = JSON.parse(msg.data);
-
-                    switch (data.type) {
-                        case 'log':
-                            setLogs(prev => [...prev, { text: data.message, type: 'normal' }]);
-                            break;
-                        case 'step_update':
-                            setCurrentStep(data.step);
-                            // Маппинг согласно гайду:
-                            // Step 1: ResearchDefinitionCard (geography, timeframe...)
-                            // Step 2: HypothesisCard (hypotheses[])
-                            // Step 4: SourceCard (title, tags, url...)
-                            if (data.artifact) {
-                                setArtifactData(data.artifact);
-                            }
-                            break;
-                        case 'done':
-                            setLogs(prev => [...prev, { text: 'Исследование успешно завершено.', type: 'dimmed' }]);
-                            setIsProcessing(false);
-                            break;
-                        case 'error':
-                            setLogs(prev => [...prev, { text: `Ошибка: ${data.message}`, type: 'error' }]);
-                            setIsProcessing(false);
-                            break;
+                    if (data.type === 'log') {
+                        setLogs(prev => [...prev, { text: data.message, type: 'normal' }]);
+                    } else if (data.type === 'step_update') {
+                        setCurrentStep(data.step);
+                        setViewStep(data.step); // Авто-переключение на новый шаг
+                        if (data.artifact) {
+                            setArtifacts(prev => ({ ...prev, [data.step]: data.artifact }));
+                        }
+                    } else if (data.type === 'done') {
+                        setIsProcessing(false);
                     }
-                },
-                onerror(err) {
-                    console.error('SSE Error:', err);
-                    setIsProcessing(false);
-                    throw err; // Позволяет библиотеке сделать реконнект или упасть
                 }
             });
-
         } catch (error) {
-            setLogs(prev => [...prev, { text: `Критическая ошибка: ${error.message}`, type: 'error' }]);
             setIsProcessing(false);
         }
     }, [token]);
 
-    return { currentStep, logs, artifactData, isProcessing, sendMessage };
+    return {
+        currentStep, viewStep, setViewStep,
+        logs, artifacts, isProcessing,
+        initialQuery, sendMessage, loadResearch
+    };
 }
