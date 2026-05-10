@@ -11,10 +11,18 @@ from sentence_transformers import SentenceTransformer
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+# Curated registry (hand-crafted, 18 datasets)
 REGISTRY_PATH = PROJECT_ROOT / "data" / "registry.json"
 INDEX_DIR = PROJECT_ROOT / "data" / "index"
 FAISS_INDEX_PATH = INDEX_DIR / "faiss.index"
 METADATA_PATH = INDEX_DIR / "metadata.json"
+
+# Full registry (auto-extracted from archive via preprocessing)
+FULL_REGISTRY_PATH = PROJECT_ROOT / "data" / "registry_full.json"
+FULL_INDEX_DIR = PROJECT_ROOT / "data" / "index_full"
+FULL_FAISS_INDEX_PATH = FULL_INDEX_DIR / "faiss.index"
+FULL_METADATA_PATH = FULL_INDEX_DIR / "metadata.json"
 
 DEFAULT_MODEL_NAME = "intfloat/multilingual-e5-small"
 
@@ -110,13 +118,17 @@ def build_index(
                 "title": dataset.get("title"),
                 "description": dataset.get("description"),
                 "source": dataset.get("source"),
+                "source_id": dataset.get("source_id"),
                 "source_url": dataset.get("source_url"),
+                "indicator_code": dataset.get("indicator_code"),
+                "file_path": dataset.get("file_path"),
+                "format": dataset.get("format"),
                 "geography": dataset.get("geography"),
                 "time_period": dataset.get("time_period"),
                 "frequency": dataset.get("frequency"),
+                "unit": dataset.get("unit"),
                 "indicators": dataset.get("indicators"),
                 "dimensions": dataset.get("dimensions"),
-                "format": dataset.get("format"),
                 "availability": dataset.get("availability"),
                 "tags": dataset.get("tags"),
                 "text_for_embedding": text,
@@ -194,19 +206,35 @@ def main() -> None:
 
     build_parser = subparsers.add_parser("build", help="build faiss index")
     build_parser.add_argument("--model", default=DEFAULT_MODEL_NAME)
+    build_parser.add_argument("--registry", default=str(REGISTRY_PATH), help="path to registry JSON")
+    build_parser.add_argument("--index-dir", default=str(INDEX_DIR), help="output directory for index files")
 
     search_parser = subparsers.add_parser("search", help="search datasets")
     search_parser.add_argument("query")
     search_parser.add_argument("--top-k", type=int, default=5)
     search_parser.add_argument("--model", default=DEFAULT_MODEL_NAME)
+    search_parser.add_argument("--index-dir", default=str(INDEX_DIR), help="index directory to search in")
 
     args = parser.parse_args()
 
     if args.command == "build":
-        build_index(model_name=args.model)
+        index_dir = Path(args.index_dir)
+        build_index(
+            registry_path=Path(args.registry),
+            index_path=index_dir / "faiss.index",
+            metadata_path=index_dir / "metadata.json",
+            model_name=args.model,
+        )
 
     if args.command == "search":
-        results = search_datasets(args.query, top_k=args.top_k, model_name=args.model)
+        index_dir = Path(args.index_dir)
+        results = search_datasets(
+            args.query,
+            top_k=args.top_k,
+            model_name=args.model,
+            index_path=index_dir / "faiss.index",
+            metadata_path=index_dir / "metadata.json",
+        )
         print_results(results)
 
 
