@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 export function useAssistant() {
     const [currentStep, setCurrentStep] = useState(0);
@@ -6,68 +7,73 @@ export function useAssistant() {
     const [artifactData, setArtifactData] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
+    // В реальном приложении токен берется из стейта авторизации или localStorage
+    const token = "your_access_token";
+
     const sendMessage = useCallback(async (message) => {
         if (!message.trim()) return;
 
         setIsProcessing(true);
-        setLogs([{ text: 'Отправка запроса на сервер...', type: 'normal' }]);
-        setCurrentStep(0);
-        setArtifactData(null); // Очищаем старые артефакты
+        setLogs([{ text: 'Авторизация и запуск задачи...', type: 'normal' }]);
+        setArtifactData(null);
 
         try {
-            // 1. Инициируем задачу на бэкенде
+            // Шаг 1: Запуск задачи (POST)
             const response = await fetch('http://localhost:8000/api/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ query: message })
             });
 
-            if (!response.ok) throw new Error('Ошибка сети');
+            if (!response.ok) throw new Error('Ошибка авторизации или запуска');
 
             const { task_id } = await response.json();
-            setLogs(prev => [...prev, { text: `Задача ${task_id} создана. Подключение к потоку...`, type: 'dimmed' }]);
 
-            // 2. Слушаем SSE поток (Server-Sent Events)
-            const eventSource = new EventSource(`http://localhost:8000/api/stream/${task_id}`);
+            // Шаг 2: Подключение к стриму (SSE) через fetch-event-source
+            await fetchEventSource(`http://localhost:8000/api/stream/${task_id}`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                onmessage(msg) {
+                    const data = JSON.parse(msg.data);
 
-            eventSource.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-
-                switch (data.type) {
-                    case 'log':
-                        setLogs(prev => [...prev, { text: data.message, type: 'normal' }]);
-                        break;
-                    case 'step_update':
-                        setCurrentStep(data.step);
-                        if (data.artifact) setArtifactData(data.artifact);
-                        break;
-                    case 'done':
-                        setLogs(prev => [...prev, { text: 'Исследование завершено.', type: 'dimmed' }]);
-                        setIsProcessing(false);
-                        eventSource.close();
-                        break;
-                    case 'error':
-                        setLogs(prev => [...prev, { text: `ОШИБКА: ${data.message}`, type: 'error' }]);
-                        setIsProcessing(false);
-                        eventSource.close();
-                        break;
-                    default:
-                        console.warn('Неизвестный тип события:', data.type);
+                    switch (data.type) {
+                        case 'log':
+                            setLogs(prev => [...prev, { text: data.message, type: 'normal' }]);
+                            break;
+                        case 'step_update':
+                            setCurrentStep(data.step);
+                            // Маппинг согласно гайду:
+                            // Step 1: ResearchDefinitionCard (geography, timeframe...)
+                            // Step 2: HypothesisCard (hypotheses[])
+                            // Step 4: SourceCard (title, tags, url...)
+                            if (data.artifact) {
+                                setArtifactData(data.artifact);
+                            }
+                            break;
+                        case 'done':
+                            setLogs(prev => [...prev, { text: 'Исследование успешно завершено.', type: 'dimmed' }]);
+                            setIsProcessing(false);
+                            break;
+                        case 'error':
+                            setLogs(prev => [...prev, { text: `Ошибка: ${data.message}`, type: 'error' }]);
+                            setIsProcessing(false);
+                            break;
+                    }
+                },
+                onerror(err) {
+                    console.error('SSE Error:', err);
+                    setIsProcessing(false);
+                    throw err; // Позволяет библиотеке сделать реконнект или упасть
                 }
-            };
-
-            eventSource.onerror = () => {
-                setLogs(prev => [...prev, { text: 'Потеряно соединение с сервером.', type: 'error' }]);
-                setIsProcessing(false);
-                eventSource.close();
-            };
+            });
 
         } catch (error) {
-            console.error(error);
-            setLogs(prev => [...prev, { text: 'Ошибка инициализации. Проверьте бэкенд.', type: 'error' }]);
+            setLogs(prev => [...prev, { text: `Критическая ошибка: ${error.message}`, type: 'error' }]);
             setIsProcessing(false);
         }
-    }, []);
+    }, [token]);
 
-    return { currentStep, setCurrentStep, logs, artifactData, isProcessing, sendMessage };
+    return { currentStep, logs, artifactData, isProcessing, sendMessage };
 }
