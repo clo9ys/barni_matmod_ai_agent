@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './styles.css';
 import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
 import ArtifactViewer from './components/ArtifactViewer';
 import TraceLog from './components/TraceLog';
 import Stepper from './components/Stepper';
+import { useAssistant } from './hooks/useAssistant';
 
 const STEPS = [
   'Запрос',
@@ -17,7 +18,14 @@ const STEPS = [
 ];
 
 export default function App() {
-  const [currentStep, setCurrentStep] = useState(0);
+  const {
+    currentStep,
+    setCurrentStep,
+    logs,
+    artifactData,
+    isProcessing,
+    sendMessage
+  } = useAssistant();
 
   return (
       <div className="app-layout">
@@ -30,16 +38,16 @@ export default function App() {
 
           <div className="workspace">
             <section className="chat-panel">
-              <Chat />
+              <Chat onSend={sendMessage} disabled={isProcessing} />
             </section>
 
             <section className="artifact-panel">
-              <ArtifactViewer currentStep={currentStep} />
+              <ArtifactViewer currentStep={currentStep} artifactData={artifactData} />
             </section>
           </div>
 
           <footer className="trace-log">
-            <TraceLog />
+            <TraceLog logs={logs} />
           </footer>
         </div>
       </div>
