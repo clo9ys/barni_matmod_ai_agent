@@ -206,3 +206,22 @@ async def stream_task(request: Request, task_id: str):
 async def get_history(user: User = Depends(get_current_user)):
     """История запросов пользователя"""
     return user.researches
+
+
+@router.get("/research/{session_id}")
+async def get_research_detail(
+        session_id: str,
+        user: User = Depends(get_current_user),
+        db: Session = Depends(get_session)
+):
+    """Получение полной информации об исследовании для загрузки истории"""
+    statement = select(ResearchTable).where(
+        ResearchTable.session_id == session_id,
+        ResearchTable.user_id == user.id
+    )
+    research = db.exec(statement).first()
+
+    if not research:
+        raise HTTPException(status_code=404, detail="Исследование не найдено")
+
+    return research
