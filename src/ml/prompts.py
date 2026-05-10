@@ -170,3 +170,310 @@ def build_research_design_messages(
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": user_prompt},
     ]
+
+
+# ---------------------------------------------------------------------------
+# Reranker prompts
+# ---------------------------------------------------------------------------
+
+RERANK_SYSTEM_PROMPT = """
+ты — эксперт по оценке релевантности экономических датасетов.
+
+твоя задача — оценить насколько датасет подходит для ответа на пользовательский запрос.
+
+отвечай только валидным json без markdown:
+{"score": 0.0, "reason": "краткое объяснение"}
+
+критерии оценки score:
+- 1.0 датасет точно содержит нужные данные
+- 0.7–0.9 датасет очень релевантен, данные скорее всего есть
+- 0.4–0.6 датасет частично подходит, данных может не хватать
+- 0.1–0.3 датасет слабо связан с запросом
+- 0.0 датасет нерелевантен
+""".strip()
+
+
+def build_rerank_messages(
+    query: str,
+    dataset: dict[str, Any],
+) -> list[dict[str, str]]:
+    dataset_info = {
+        "title": dataset.get("title"),
+        "source": dataset.get("source"),
+        "description": dataset.get("description"),
+        "indicators": dataset.get("indicators"),
+        "geography": dataset.get("geography"),
+        "time_period": dataset.get("time_period"),
+        "tags": dataset.get("tags"),
+    }
+
+    user_prompt = f"""
+запрос пользователя: {query}
+
+датасет:
+{json.dumps(dataset_info, ensure_ascii=False, indent=2)}
+
+оцени релевантность.
+""".strip()
+
+    return [
+        {"role": "system", "content": RERANK_SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt},
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Metadata enrichment prompts
+# ---------------------------------------------------------------------------
+
+ENRICH_SYSTEM_PROMPT = """
+ты — эксперт по экономической статистике.
+
+тебе дают технические метаданные файла: название, источник, колонки, образец данных.
+твоя задача — написать понятное описание датасета и подобрать теги для поиска.
+
+отвечай только валидным json без markdown:
+{"description": "string", "tags": ["string"]}
+
+правила:
+- описание на английском, 2–3 предложения: что за данные и для чего они полезны
+- теги: названия показателей, источник, тематика + русские переводы ключевых слов
+- не придумывай данные которых нет в метаданных
+""".strip()
+
+
+def build_enrich_metadata_messages(metadata: dict[str, Any]) -> list[dict[str, str]]:
+    info = {
+        "title": metadata.get("title"),
+        "source": metadata.get("source"),
+        "file_path": metadata.get("file_path"),
+        "columns": (metadata.get("columns") or [])[:30],
+        "indicators": (metadata.get("indicators") or [])[:10],
+        "time_period": metadata.get("time_period"),
+        "geography": (metadata.get("geography") or [])[:10],
+    }
+
+    user_prompt = f"""
+опиши датасет на основе метаданных:
+{json.dumps(info, ensure_ascii=False, indent=2)}
+""".strip()
+
+    return [
+        {"role": "system", "content": ENRICH_SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt},
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Assembly plan prompts
+# ---------------------------------------------------------------------------
+
+ASSEMBLY_PLAN_SYSTEM_PROMPT = """
+ты — аналитик данных. твоя задача — составить план сборки датасета:
+решить, какие источники использовать, отвергнуть лишние, и описать,
+как объединить данные в целевую структуру.
+
+отвечай только валидным json без markdown.
+не придумывай dataset_id или file_path — используй только те, что переданы в запросе.
+""".strip()
+
+ASSEMBLY_PLAN_SCHEMA = {
+    "primary_sources": [
+        {
+            "dataset_id": "string — id из реестра",
+            "file_path": "string — путь к файлу относительно ARCHIVE_ROOT (из метаданных)",
+            "source_id": "string — fedstatru | wb | rosstat | ...",
+            "role": "main | supplementary",
+            "years_used": ["int — только те годы, которые реально есть в файле"],
+            "filters": {
+                "okato": "string или null — код ОКАТО (для Fedstat; 643 = Россия)",
+                "period": "string или null — код периода (62=декабрь, 30=год, 118=янв-дек)",
+                "countryiso3": "string или null — ISO3 (для WB; RUS = Россия)",
+            },
+            "reason": "string — почему выбран этот источник",
+        }
+    ],
+    "rejected_sources": [
+        {
+            "dataset_id": "string",
+            "reason": "string — почему отвергнут",
+        }
+    ],
+    "combination_strategy": "single_source | concat_by_year | priority_merge | join",
+    "join_key": "year | null",
+    "output_columns": [
+        {
+            "name": "string — итоговое название колонки",
+            "source_col": "string — откуда берётся (year / value / ...)",
+            "type": "int | float | str | date",
+            "unit": "string или null",
+        }
+    ],
+}
+
+
+def build_assembly_plan_messages(
+    user_query: str,
+    extracted_params: dict[str, Any],
+    top_datasets: list[dict[str, Any]],
+    research_design: dict[str, Any],
+) -> list[dict[str, str]]:
+    compact_datasets = [
+        {
+            "id": d.get("id"),
+            "title": d.get("title"),
+            "source": d.get("source"),
+            "source_id": d.get("source_id"),
+            "file_path": d.get("file_path"),
+            "format": d.get("format"),
+            "time_period": d.get("time_period"),
+            "geography": d.get("geography"),
+            "available_coverage": d.get("available_coverage"),
+            "rerank_score": d.get("rerank_score"),
+            "rerank_reason": d.get("rerank_reason"),
+        }
+        for d in top_datasets
+    ]
+
+    user_prompt = f"""
+запрос: {user_query}
+
+период исследования: {json.dumps(extracted_params.get("time_period"), ensure_ascii=False)}
+география: {json.dumps(extracted_params.get("geography"), ensure_ascii=False)}
+нужные индикаторы: {json.dumps(research_design.get("required_indicators", []), ensure_ascii=False, indent=2)}
+
+доступные датасеты (выбирай только из этого списка):
+{json.dumps(compact_datasets, ensure_ascii=False, indent=2)}
+
+составь план сборки по схеме:
+{format_json_schema(ASSEMBLY_PLAN_SCHEMA)}
+
+правила:
+- в primary_sources включай только датасеты с file_path != null
+- если несколько источников покрывают разные периоды — используй combination_strategy = "priority_merge"
+- если данные за нужный период есть только в одном источнике — combination_strategy = "single_source"
+- years_used — только реальный диапазон из поля time_period датасета, пересечённый с запрошенным периодом
+- output_columns — итоговая структура результирующего датасета
+- для Fedstat датасетов: available_coverage — словарь {{"период-метка": [годы с данными]}}
+  - filters.period ОБЯЗАН быть числовой частью ключа из available_coverage
+    (например "62 декабрь" → period="62", "118 январь-декабрь" → period="118")
+  - НЕ используй period которого нет в available_coverage
+  - years_used = пересечение запрошенного периода и лет из available_coverage[выбранный период]
+- если один датасет не покрывает все запрошенные годы: используй combination_strategy="priority_merge"
+  и добавь supplementary источник из другого датасета для непокрытых лет,
+  у каждого источника years_used должен содержать только реально доступные годы из его available_coverage
+""".strip()
+
+    return [
+        {"role": "system", "content": ASSEMBLY_PLAN_SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt},
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Code generation prompts
+# ---------------------------------------------------------------------------
+
+CODEGEN_SYSTEM_PROMPT = """
+ты — python-разработчик специализирующийся на экономических данных.
+
+напиши готовый к запуску python-скрипт который:
+1. загружает данные из локального архива parquet-файлов (путь будет передан в промпте)
+2. объединяет данные из нескольких источников в один pandas dataframe
+3. рассчитывает производные метрики
+4. строит графики
+
+правила кода:
+- только рабочий python-код без пояснений вне кода
+- используй: pandas, numpy, matplotlib, pathlib, datetime
+- не используй requests и не обращайся к внешним api — только локальные файлы
+- полный путь к файлу: Path(ARCHIVE_ROOT) / file_path  (file_path из метаданных датасета)
+- добавляй колонку source (id датасета) и extraction_date (date.today())
+- в конце plt.tight_layout(); plt.show()
+
+== загрузка данных — используй готовые утилиты из src.tools.readers ==
+
+для Fedstat / Rosstat (fedstatru/data/parquet/*.parquet):
+  from src.tools.readers import read_fedstatru_parquet
+  df = read_fedstatru_parquet(
+      path=Path(ARCHIVE_ROOT) / file_path,
+      okato='643',    # 643 = Россия (или код региона)
+      period='62',    # 62 = декабрь; 30 = год в целом; 118 = январь-декабрь
+      years=[2014, 2015, ..., 2024],  # или None для всех лет
+  )
+  # возвращает DataFrame с колонками: year (int), value (float)
+
+для World Bank (wb/parquet/*.parquet):
+  from src.tools.readers import read_wb_parquet
+  df = read_wb_parquet(
+      path=Path(ARCHIVE_ROOT) / file_path,
+      countryiso3='RUS',    # iso3 код страны
+      years=[2014, ..., 2024],
+  )
+  # возвращает DataFrame с колонками: year (int), value (float)
+
+== объединение источников ==
+после загрузки добавь колонки source и extraction_date, объедини через pd.concat,
+удали дубли по году (keep='first' с приоритетом основного источника).
+""".strip()
+
+
+def build_codegen_messages(
+    user_query: str,
+    research_design: dict[str, Any],
+    datasets: list[dict[str, Any]],
+    archive_root: str = "",
+    assembly_plan: dict[str, Any] | None = None,
+) -> list[dict[str, str]]:
+    archive_note = f"\nARCHIVE_ROOT = r\"{archive_root}\"" if archive_root else ""
+
+    if assembly_plan:
+        # Use the structured plan — LLM gets exact files, filters, and output schema
+        sources_block = f"""
+план сборки данных (следуй ему точно):
+{json.dumps(assembly_plan, ensure_ascii=False, indent=2)}
+""".strip()
+    else:
+        # Fallback: pass raw dataset list (pre-assembly_plan behaviour)
+        compact_datasets = [
+            {
+                "id": d.get("id"),
+                "title": d.get("title"),
+                "source": d.get("source"),
+                "indicator_code": d.get("indicator_code"),
+                "file_path": d.get("file_path"),
+                "format": d.get("format"),
+                "time_period": d.get("time_period"),
+                "geography": d.get("geography"),
+            }
+            for d in datasets
+        ]
+        sources_block = f"""
+источники данных (file_path относителен ARCHIVE_ROOT):
+{json.dumps(compact_datasets, ensure_ascii=False, indent=2)}
+""".strip()
+
+    user_prompt = f"""
+напиши python-скрипт для следующего исследования.
+
+запрос: {user_query}
+{archive_note}
+
+{sources_block}
+
+производные метрики:
+{json.dumps(research_design.get("derived_metrics", []), ensure_ascii=False, indent=2)}
+
+ожидаемые визуализации:
+{json.dumps(research_design.get("expected_visualizations", []), ensure_ascii=False, indent=2)}
+
+важно:
+- читай данные из локальных parquet-файлов по пути Path(ARCHIVE_ROOT) / file_path
+- для каждого датасета добавляй колонки source (dataset_id) и extraction_date
+- итоговый датасет должен иметь колонки из output_columns плана (если план передан)
+""".strip()
+
+    return [
+        {"role": "system", "content": CODEGEN_SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt},
+    ]
