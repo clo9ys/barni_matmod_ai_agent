@@ -14,25 +14,27 @@ from src.ml.rag import search_datasets
 router = APIRouter(tags=["research"])
 event_queues: Dict[str, asyncio.Queue] = {}
 
-def run_agent_worker(task_id: str, query: str, user_id: int):
-    loop = asyncio.get_event_loop()
-
+# ДОБАВЛЕН АРГУМЕНТ loop
+def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.AbstractEventLoop):
     def sync_push(data: dict):
         if task_id in event_queues:
+            # Используем переданный главный loop
             asyncio.run_coroutine_threadsafe(event_queues[task_id].put(data), loop)
 
     with Session(engine) as db:
+        db_state = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
+
         try:
             sync_push({"type": "log", "message": "🤖 Запуск агента. Анализирую запрос..."})
 
             params_messages = build_extract_params_messages(query)
             params = complete_json(params_messages)
 
-            db_state = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
-            db_state.definition = params
-            db_state.trace.append("Шаг 2 выполнен: параметры извлечены")
-            db.add(db_state)
-            db.commit()
+            if db_state:
+                db_state.definition = params
+                db_state.trace.append("Шаг 2 выполнен: параметры извлечены")
+                db.add(db_state)
+                db.commit()
 
             sync_push({
                 "type": "step_update",
@@ -49,10 +51,11 @@ def run_agent_worker(task_id: str, query: str, user_id: int):
             design_messages = build_research_design_messages(query, params)
             design = complete_json(design_messages)
 
-            db_state.design = design
-            db_state.current_step = 3
-            db.add(db_state)
-            db.commit()
+            if db_state:
+                db_state.design = design
+                db_state.current_step = 3
+                db.add(db_state)
+                db.commit()
 
             sync_push({
                 "type": "step_update",
@@ -75,10 +78,11 @@ def run_agent_worker(task_id: str, query: str, user_id: int):
 
             if found_datasets:
                 best_ds = found_datasets[0]
-                db_state.assembly_plan = {"sources": found_datasets, "plan": "Интеграция через Python/Pandas"}
-                db_state.current_step = 5
-                db.add(db_state)
-                db.commit()
+                if db_state:
+                    db_state.assembly_plan = {"sources": found_datasets, "plan": "Интеграция через Python/Pandas"}
+                    db_state.current_step = 5
+                    db.add(db_state)
+                    db.commit()
 
                 sync_push({
                     "type": "step_update",
@@ -94,10 +98,11 @@ def run_agent_worker(task_id: str, query: str, user_id: int):
                 sync_push({"type": "log", "message": "⚠️ Данные в реестре не найдены."})
 
             sync_push({"type": "log", "message": "⚙️ Генерация кода сборки..."})
-            db_state.generated_script = "import pandas as pd\nprint('Сборка завершена')"
-            db_state.current_step = 7
-            db.add(db_state)
-            db.commit()
+            if db_state:
+                db_state.generated_script = "import pandas as pd\nprint('Сборка завершена')"
+                db_state.current_step = 7
+                db.add(db_state)
+                db.commit()
 
             sync_push({"type": "done"})
 
@@ -132,7 +137,10 @@ async def init_chat(
     db.add(new_research)
     db.commit()
 
-    background_tasks.add_task(run_agent_worker, task_id, query, user.id)
+    # ПОЛУЧАЕМ ГЛАВНЫЙ LOOP И ПЕРЕДАЕМ В ФОН
+    loop = asyncio.get_running_loop()
+    background_tasks.add_task(run_agent_worker, task_id, query, user.id, loop)
+
     return {"task_id": task_id}
 
 @router.get("/stream/{task_id}")

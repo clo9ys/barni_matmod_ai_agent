@@ -55,6 +55,9 @@ export function useAssistant(token) {
         setCurrentStep(0);
         setViewStep(0);
 
+        // Добавляем контроллер для жесткого прерывания реконнектов
+        const ctrl = new AbortController();
+
         try {
             const response = await fetch('http://localhost:8000/api/v1/chat', {
                 method: 'POST',
@@ -70,6 +73,7 @@ export function useAssistant(token) {
 
             await fetchEventSource(`http://localhost:8000/api/v1/stream/${task_id}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
+                signal: ctrl.signal, // Передаем сигнал отмены
                 onmessage(msg) {
                     if (!msg.data) return;
 
@@ -87,22 +91,28 @@ export function useAssistant(token) {
                         } else if (data.type === 'done') {
                             setIsProcessing(false);
                             setLogs(prev => [...prev, { text: 'Анализ завершен', type: 'dimmed' }]);
+                            ctrl.abort(); // Жестко прерываем реконнект
                         } else if (data.type === 'error') {
                             setIsProcessing(false);
                             setLogs(prev => [...prev, { text: `Ошибка: ${data.message}`, type: 'error' }]);
+                            ctrl.abort(); // Жестко прерываем реконнект
                         }
                     } catch (parseError) {
                         console.warn("Ошибка парсинга JSON из потока:", msg.data);
                     }
                 },
                 onerror(err) {
+                    // Игнорируем ошибку AbortError (мы сами ее вызвали)
+                    if (err.name === 'AbortError') return;
                     setIsProcessing(false);
-                    throw err;
+                    throw err; // Прокидываем ошибку дальше, чтобы остановить SSE
                 }
             });
         } catch (error) {
-            setLogs(prev => [...prev, { text: `Ошибка: ${error.message}`, type: 'error' }]);
-            setIsProcessing(false);
+            if (error.name !== 'AbortError') {
+                setLogs(prev => [...prev, { text: `Ошибка: ${error.message}`, type: 'error' }]);
+                setIsProcessing(false);
+            }
         }
     }, [token]);
 
