@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Sidebar() {
+export default function Sidebar({ token, onLogout }) {
     const [history, setHistory] = useState([]);
-    const token = "your_access_token";
 
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const res = await fetch('http://localhost:8000/api/history', {
+                const res = await fetch('http://localhost:8000/api/v1/history', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -23,8 +22,9 @@ export default function Sidebar() {
 
     return (
         <aside className="sidebar">
-            <div className="sidebar-header">
+            <div className="sidebar-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <h2 className="sidebar-title">НЦСЭД Ассистент</h2>
+                <button onClick={onLogout} style={{background: 'transparent', color: '#ff4d4f', border: 'none', cursor: 'pointer'}}>Выйти</button>
             </div>
             <div className="sidebar-actions">
                 <button className="btn-primary sidebar-btn">+ Новый запрос</button>

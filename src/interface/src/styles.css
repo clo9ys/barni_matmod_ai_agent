@@ -437,3 +437,76 @@ body {
     text-overflow: ellipsis;
     display: block;
 }
+
+/* Auth Page */
+.auth-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+    background-color: #1e1e24; /* Темный фон под стать сайдбару */
+}
+
+.auth-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.auth-card h2 {
+    color: #111;
+    margin-bottom: 5px;
+}
+
+.auth-subtitle {
+    color: #666;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+}
+
+.auth-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-card input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.auth-card input:focus {
+    outline: none;
+    border-color: #0066cc;
+}
+
+.auth-error {
+    color: #d32f2f;
+    font-size: 0.85rem;
+    background: #ffebee;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.auth-error.success {
+    color: #2e7d32;
+    background: #e8f5e9;
+}
+
+.auth-switch {
+    margin-top: 20px;
+    color: #0066cc;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.auth-switch:hover {
+    text-decoration: underline;
+}

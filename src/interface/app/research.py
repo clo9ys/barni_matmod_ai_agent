@@ -12,7 +12,7 @@ from src.ml.model import complete_json
 from src.ml.prompts import build_extract_params_messages, build_research_design_messages
 from src.ml.rag import search_datasets
 
-router = APIRouter(prefix="/api", tags=["research"])
+router = APIRouter(tags=["research"])
 
 # Глобальное хранилище очередей для стриминга
 # task_id -> asyncio.Queue

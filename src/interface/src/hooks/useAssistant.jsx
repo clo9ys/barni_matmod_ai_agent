@@ -1,14 +1,11 @@
 import { useState, useCallback } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
-export function useAssistant() {
+export function useAssistant(token) {
     const [currentStep, setCurrentStep] = useState(0);
     const [logs, setLogs] = useState([{ text: 'Ожидание запроса...', type: 'dimmed' }]);
     const [artifactData, setArtifactData] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
-
-    // В реальном приложении токен берется из стейта авторизации или localStorage
-    const token = "your_access_token";
 
     const sendMessage = useCallback(async (message) => {
         if (!message.trim()) return;
@@ -19,7 +16,7 @@ export function useAssistant() {
 
         try {
             // Шаг 1: Запуск задачи (POST)
-            const response = await fetch('http://localhost:8000/api/chat', {
+            const response = await fetch('http://localhost:8000/api/v1/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -33,7 +30,7 @@ export function useAssistant() {
             const { task_id } = await response.json();
 
             // Шаг 2: Подключение к стриму (SSE) через fetch-event-source
-            await fetchEventSource(`http://localhost:8000/api/stream/${task_id}`, {
+            await fetchEventSource(`http://localhost:8000/api/v1/stream/${task_id}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 onmessage(msg) {
                     const data = JSON.parse(msg.data);
