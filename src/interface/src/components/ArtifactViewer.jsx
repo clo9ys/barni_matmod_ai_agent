@@ -1,20 +1,27 @@
-export default function ArtifactViewer({ currentStep, artifactData }) {
-    const renderArtifact = () => {
-        if (!artifactData && currentStep !== 0) return <p>Ожидание данных этапа...</p>;
+import React from 'react';
+import ResearchDefinitionCard from './cards/ResearchDefinitionCard';
+import HypothesisCard from './cards/HypothesisCard';
+import SourceCard from './cards/SourceCard';
 
-        switch (currentStep) {
-            case 0: return <p>Опишите задачу, чтобы начать.</p>;
-            case 1:
-                // Step 1: Определение (geography, timeframe, perspective, questions)
-                return <ResearchDefinitionCard data={artifactData} />;
-            case 2:
-                // Step 2: Гипотезы (hypotheses: [{title, metrics}])
-                return <HypothesisCard hypotheses={artifactData.hypotheses} />;
-            case 4:
-                // Step 4: Источники (title, tags, description, url)
-                return <SourceCard source={artifactData} />;
-            default:
-                return <p>Шаг {currentStep} находится в обработке...</p>;
+export default function ArtifactViewer({ step, data, query }) {
+    const renderArtifact = () => {
+        // Шаг 0: Показываем исходный запрос пользователя
+        if (step === 0) {
+            return (
+                <div className="query-display">
+                    <h3>Ваш запрос:</h3>
+                    <p>{query || "Ожидание ввода..."}</p>
+                </div>
+            );
+        }
+
+        if (!data) return <p className="dimmed">Данные для этого этапа еще не получены...</p>;
+
+        switch (step) {
+            case 1: return <ResearchDefinitionCard data={data} />;
+            case 2: return <HypothesisCard hypotheses={data.hypotheses} />;
+            case 4: return <SourceCard source={data} />;
+            default: return <p>Результаты этапа {step} в обработке...</p>;
         }
     };
 

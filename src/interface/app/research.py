@@ -1,7 +1,6 @@
 import asyncio
 import json
 import uuid
-from datetime import datetime
 from typing import Dict
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlmodel import Session, select
@@ -13,41 +12,29 @@ from src.ml.prompts import build_extract_params_messages, build_research_design_
 from src.ml.rag import search_datasets
 
 router = APIRouter(tags=["research"])
-
-# Глобальное хранилище очередей для стриминга
-# task_id -> asyncio.Queue
 event_queues: Dict[str, asyncio.Queue] = {}
 
+def run_agent_worker(task_id: str, query: str, user_id: int):
+    loop = asyncio.get_event_loop()
 
-async def push_event(task_id: str, data: dict):
-    """Отправка события в очередь фронтенда"""
-    if task_id in event_queues:
-        await event_queues[task_id].put(data)
+    def sync_push(data: dict):
+        if task_id in event_queues:
+            asyncio.run_coroutine_threadsafe(event_queues[task_id].put(data), loop)
 
-
-async def run_agent_worker(task_id: str, query: str, user_id: int):
-    """
-    Фоновый воркер, который проходит по всем шагам ТЗ
-    и пушит события фронтенду через SSE.
-    """
-    # Создаем свою сессию БД для фонового потока
     with Session(engine) as db:
         try:
-            # 1. Инициализация и Шаг 2 (Определение)
-            await push_event(task_id, {"type": "log", "message": "🤖 Запуск агента. Анализирую запрос..."})
+            sync_push({"type": "log", "message": "🤖 Запуск агента. Анализирую запрос..."})
 
             params_messages = build_extract_params_messages(query)
             params = complete_json(params_messages)
 
-            # Сохраняем в БД
             db_state = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
             db_state.definition = params
             db_state.trace.append("Шаг 2 выполнен: параметры извлечены")
             db.add(db_state)
             db.commit()
 
-            # Пушим на фронт (ResearchDefinitionCard)
-            await push_event(task_id, {
+            sync_push({
                 "type": "step_update",
                 "step": 1,
                 "artifact": {
@@ -58,9 +45,7 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
                 }
             })
 
-            # 2. Шаг 3 (Дизайн исследования / Гипотезы)
-            await push_event(task_id, {"type": "log", "message": "📝 Формирую гипотезы и дизайн исследования..."})
-
+            sync_push({"type": "log", "message": "📝 Формирую гипотезы и дизайн исследования..."})
             design_messages = build_research_design_messages(query, params)
             design = complete_json(design_messages)
 
@@ -69,8 +54,7 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
             db.add(db_state)
             db.commit()
 
-            # Пушим на фронт (HypothesisCard)
-            await push_event(task_id, {
+            sync_push({
                 "type": "step_update",
                 "step": 2,
                 "artifact": {
@@ -85,10 +69,7 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
                 }
             })
 
-            # 3. Шаг 5 (Поиск в реестре через RAG/FAISS)
-            await push_event(task_id, {"type": "log", "message": "🔍 Ищу подходящие датасеты в реестре НЦСЭД..."})
-
-            # Поиск в FAISS (из твоего rag.py)
+            sync_push({"type": "log", "message": "🔍 Ищу подходящие датасеты в реестре НЦСЭД..."})
             search_query = f"{query} {params.get('subject_area', '')}"
             found_datasets = search_datasets(search_query, top_k=3)
 
@@ -99,10 +80,9 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
                 db.add(db_state)
                 db.commit()
 
-                # Пушим на фронт (SourceCard)
-                await push_event(task_id, {
+                sync_push({
                     "type": "step_update",
-                    "step": 4,  # У фронта это 4-й тип карточки
+                    "step": 4,
                     "artifact": {
                         "title": best_ds.get('title'),
                         "tags": best_ds.get('tags', []),
@@ -111,26 +91,22 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
                     }
                 })
             else:
-                await push_event(task_id, {"type": "log", "message": "⚠️ Данные в реестре не найдены."})
+                sync_push({"type": "log", "message": "⚠️ Данные в реестре не найдены."})
 
-            # 4. Шаг 6 и 7 (Скрипт и Сборка)
-            await push_event(task_id, {"type": "log", "message": "⚙️ Генерация кода сборки..."})
-            # Тут можно добавить вызов промпта для кода, пока имитируем
+            sync_push({"type": "log", "message": "⚙️ Генерация кода сборки..."})
             db_state.generated_script = "import pandas as pd\nprint('Сборка завершена')"
             db_state.current_step = 7
             db.add(db_state)
             db.commit()
 
-            # Финальное событие
-            await push_event(task_id, {"type": "done"})
+            sync_push({"type": "done"})
 
         except Exception as e:
-            await push_event(task_id, {"type": "error", "message": f"Ошибка агента: {str(e)}"})
+            sync_push({"type": "error", "message": f"Ошибка агента: {str(e)}"})
             if db_state:
                 db_state.errors.append(str(e))
                 db.add(db_state)
                 db.commit()
-
 
 @router.post("/chat")
 async def init_chat(
@@ -139,18 +115,14 @@ async def init_chat(
         user: User = Depends(get_current_user),
         db: Session = Depends(get_session)
 ):
-    """Эндпоинт 1: Принимает запрос и запускает воркер"""
     body = await request.json()
     query = body.get("query")
     if not query:
         raise HTTPException(status_code=400, detail="Query is required")
 
     task_id = str(uuid.uuid4())
-
-    # Инициализируем очередь для стриминга
     event_queues[task_id] = asyncio.Queue()
 
-    # Создаем запись в истории
     new_research = ResearchTable(
         session_id=task_id,
         query=query,
@@ -160,53 +132,36 @@ async def init_chat(
     db.add(new_research)
     db.commit()
 
-    # Запускаем тяжелую логику в фоне
     background_tasks.add_task(run_agent_worker, task_id, query, user.id)
-
     return {"task_id": task_id}
-
 
 @router.get("/stream/{task_id}")
 async def stream_task(request: Request, task_id: str):
-    """Эндпоинт 2: Стриминг событий через SSE"""
-
     async def event_generator():
         if task_id not in event_queues:
             yield {"data": json.dumps({"type": "error", "message": "Task not found"})}
             return
 
         queue = event_queues[task_id]
-
         try:
             while True:
-                # Если клиент закрыл вкладку - выходим
                 if await request.is_disconnected():
                     break
-
-                # Получаем событие из очереди воркера
                 event_data = await queue.get()
-
-                # Отправляем в формате SSE
                 yield {"data": json.dumps(event_data, ensure_ascii=False)}
-
-                # Если это было финальное событие - закрываем стрим
                 if event_data.get("type") in ["done", "error"]:
                     break
         except Exception as e:
             yield {"data": json.dumps({"type": "error", "message": str(e)})}
         finally:
-            # Очистка очереди
             if task_id in event_queues:
                 del event_queues[task_id]
 
     return EventSourceResponse(event_generator())
 
-
 @router.get("/history")
 async def get_history(user: User = Depends(get_current_user)):
-    """История запросов пользователя"""
     return user.researches
-
 
 @router.get("/research/{session_id}")
 async def get_research_detail(
@@ -214,14 +169,11 @@ async def get_research_detail(
         user: User = Depends(get_current_user),
         db: Session = Depends(get_session)
 ):
-    """Получение полной информации об исследовании для загрузки истории"""
     statement = select(ResearchTable).where(
         ResearchTable.session_id == session_id,
         ResearchTable.user_id == user.id
     )
     research = db.exec(statement).first()
-
     if not research:
         raise HTTPException(status_code=404, detail="Исследование не найдено")
-
     return research
