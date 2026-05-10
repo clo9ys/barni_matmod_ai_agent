@@ -3,11 +3,14 @@ from typing import Optional
 
 
 class ResearchDefinition(BaseModel):
-    """Шаг 2: Формальное определение исследования"""
-    geography: str = Field(..., description="Географический охват (например, страны БРИКС)")
-    time_period: str = Field(..., description="Временные рамки (например, 2015-2024)")
-    disciplinary_focus: str = Field(..., description="Дисциплинарный ракурс (экономика, социология и т.д.)")
-    research_questions: list[str] = Field(..., description="Конкретные исследовательские вопросы")
+    geography: Optional[str] = Field(description="Географический охват (страны, регионы). Null, если не указано.")
+    timeframe: Optional[str] = Field(description="Временные рамки (годы, месяцы). Null, если не указано.")
+    perspective: str = Field(description="Дисциплинарный ракурс (например: Макроэкономика, Демография).")
+    questions: List[str] = Field(description="Список из 1-3 конкретных исследовательских вопросов.")
+
+    # Флаги для контроля потока
+    is_ambiguous: bool = Field(description="True, если запрос слишком общий и не хватает географии или времени.")
+    clarifying_question: Optional[str] = Field(description="Короткий вопрос пользователю, если is_ambiguous = True.")
 
 
 class ResearchDesign(BaseModel):

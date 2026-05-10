@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-export default function Chat() {
+export default function Chat({ onSend, disabled }) {
+    const [inputValue, setInputValue] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (inputValue.trim() && !disabled) {
+            onSend(inputValue);
+            setInputValue(''); // Очищаем поле после отправки
+        }
+    };
+
     return (
         <>
             <div className="messages-area">
@@ -11,15 +21,25 @@ export default function Chat() {
                         Опишите задачу, и я помогу спроектировать исследование.
                     </p>
                 </div>
+                {/* В будущем здесь можно рендерить историю сообщений */}
             </div>
 
-            <div className="input-area">
+            <form className="input-area" onSubmit={handleSubmit}>
                 <textarea
-                    rows="1"
+                    rows="2"
                     placeholder="Например: Собери динамику инфляции по странам ЕС..."
-                ></textarea>
-                <button className="btn-primary">Отправить</button>
-            </div>
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    disabled={disabled}
+                />
+                <button
+                    type="submit"
+                    className="btn-primary"
+                    disabled={disabled}
+                >
+                    {disabled ? 'Думаю...' : 'Отправить'}
+                </button>
+            </form>
         </>
     );
 }
