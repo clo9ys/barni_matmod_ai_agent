@@ -1,0 +1,406 @@
+/* ==========================================================================
+   1. ГЛОБАЛЬНЫЕ СТИЛИ И СБРОС
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: #333;
+    background-color: #f9f9f9;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   2. ОСНОВНОЙ МАКЕТ (LAYOUT)
+   ========================================================================== */
+.app-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden; /* Запрещаем общий скролл страницы */
+}
+
+.sidebar {
+    width: 260px;
+    background-color: #1e1e24;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* Важно для корректной работы flex с длинным контентом */
+}
+
+.top-bar {
+    height: 60px;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    flex-shrink: 0;
+}
+
+.workspace {
+    flex: 1;
+    display: flex;
+    overflow: hidden; /* Внутренние панели будут скроллиться сами */
+}
+
+/* ==========================================================================
+   3. ПАНЕЛИ РАБОЧЕЙ ОБЛАСТИ
+   ========================================================================== */
+.chat-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e0e0e0;
+    background: #fff;
+}
+
+.artifact-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px;
+    background: #f4f5f7;
+}
+
+.trace-log {
+    height: 140px;
+    background: #1a1a1a;
+    color: #4af626;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    padding: 15px;
+    overflow-y: auto;
+    font-size: 13px;
+    border-top: 2px solid #333;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   4. КОМПОНЕНТ SIDEBAR (БОКОВАЯ ПАНЕЛЬ)
+   ========================================================================== */
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #333;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-actions {
+    padding: 20px;
+}
+
+.sidebar-btn {
+    width: 100%;
+    padding: 12px;
+    font-weight: 500;
+}
+
+.sidebar-history {
+    padding: 0 20px;
+    font-size: 0.85rem;
+    color: #8e8e93;
+}
+
+.sidebar-history p {
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   5. КОМПОНЕНТ CHAT (ЧАТ)
+   ========================================================================== */
+.messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.chat-placeholder {
+    text-align: center;
+    margin-top: 15%;
+    padding: 0 40px;
+}
+
+.chat-icon {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    opacity: 0.8;
+}
+
+.chat-title {
+    margin-bottom: 10px;
+    font-size: 1.25rem;
+}
+
+.chat-subtitle {
+    color: #666;
+    font-size: 0.95rem;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.input-area {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 12px;
+    background: #fff;
+}
+
+.input-area textarea {
+    flex: 1;
+    resize: none;
+    padding: 12px;
+    border: 1px solid #d1d1d6;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.input-area textarea:focus {
+    outline: none;
+    border-color: #0066cc;
+}
+
+/* ==========================================================================
+   6. КОМПОНЕНТЫ ARTIFACTS (КАРТОЧКИ И ДАННЫЕ)
+   ========================================================================== */
+.card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.card-title {
+    margin: 0 0 16px 0;
+    font-size: 1.15rem;
+    color: #111;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 12px;
+}
+
+.card-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 18px;
+}
+
+/* Группы параметров */
+.param-group {
+    margin-bottom: 12px;
+}
+
+.param-label {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+    margin-right: 8px;
+}
+
+.param-value {
+    color: #222;
+    font-size: 0.95rem;
+}
+
+.param-questions-group {
+    margin-top: 20px;
+}
+
+.param-questions-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.questions-list {
+    padding-left: 20px;
+}
+
+.question-item {
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+}
+
+/* Источники (SourceCard) */
+.source-title {
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+}
+
+.tags-container {
+    margin-bottom: 15px;
+}
+
+.source-desc {
+    font-size: 0.95rem;
+    color: #444;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.source-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 15px;
+}
+
+.source-org {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.source-link {
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.source-link:hover {
+    text-decoration: underline;
+}
+
+/* Таблицы и код */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    margin-top: 15px;
+}
+
+.data-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+    font-size: 0.9rem;
+}
+
+.data-table td {
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    font-size: 0.9rem;
+}
+
+.code-block {
+    background: #1e1e24;
+    color: #e6e6e6;
+    padding: 20px;
+    border-radius: 8px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+    overflow-x: auto;
+}
+
+/* ==========================================================================
+   7. ВСПОМОГАТЕЛЬНЫЕ ЭЛЕМЕНТЫ (UI KIT)
+   ========================================================================== */
+.btn-primary {
+    background-color: #0066cc;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #0052a3;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #e7f3ff;
+    color: #0066cc;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.stepper {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.step-item {
+    color: #8e8e93;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.step-item:hover {
+    color: #0066cc;
+}
+
+.step-item.active {
+    color: #0066cc;
+    font-weight: 700;
+    border-bottom: 2px solid #0066cc;
+    padding-bottom: 4px;
+}
+
+.checkbox-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.checkbox-title {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.checkbox-desc {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.section-title {
+    margin-bottom: 24px;
+    font-size: 1.5rem;
+}
+
+.section-subtitle {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.log-entry {
+    margin-bottom: 4px;
+}
+
+.log-entry.dimmed {
+    color: #666;
+}
