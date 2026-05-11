@@ -399,15 +399,6 @@ cython_debug/
 /.history
 .history
 
-# runtime / generated
-data/assistant.db
-data/outputs/
-outputs/
-output_dataset/
-src/data/
-_model_cache/
-_index_cache/
-
 
 
 # Logs
@@ -432,3 +423,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+outputs

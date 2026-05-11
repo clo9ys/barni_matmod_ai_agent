@@ -505,21 +505,9 @@ def build_codegen_messages(
     output_dir_note = f"\nOUTPUT_DIR = Path(r\"{output_dir}\")" if output_dir else "\nOUTPUT_DIR = Path(\"output_dataset\")"
 
     if assembly_plan:
-        # Build an explicit file-path table so the LLM cannot hallucinate paths
-        exact_paths: list[str] = []
-        for s in assembly_plan.get("primary_sources", []):
-            fp = s.get("file_path")
-            did = s.get("dataset_id", "?")
-            if fp:
-                exact_paths.append(f'  {did}: "{fp}"')
-        exact_paths_block = (
-            "\nОБЯЗАТЕЛЬНО используй ТОЛЬКО эти file_path (точно как написано, без изменений):\n"
-            + "\n".join(exact_paths)
-        ) if exact_paths else ""
-
+        # Use the structured plan — LLM gets exact files, filters, and output schema
         sources_block = f"""
-план сборки данных (следуй ему точно):{exact_paths_block}
-
+план сборки данных (следуй ему точно):
 {json.dumps(assembly_plan, ensure_ascii=False, indent=2)}
 """.strip()
     else:
