@@ -21,9 +21,9 @@ export default function ArtifactViewer({ step, data, query }) {
 
         switch (step) {
             case 1: return <ResearchDefinitionCard data={data} />;
-            case 2: return <HypothesisCard hypotheses={data.hypotheses} />;
-            case 3: return <p className="dimmed">Структура данных формируется...</p>; // Резерв для структуры
-            case 4: return <SourceCard source={data} />;
+            case 2: return <SourceCard source={data} />;
+            case 3: return <HypothesisCard hypotheses={data.hypotheses} />;
+            case 4: return <p className="dimmed">План сборки данных успешно прошел валидацию.</p>;
             case 5: return <ScriptCard data={data} />;
             case 6: return <ResultCard data={data} />;
             default: return <p>Результаты этапа {step} в обработке...</p>;
