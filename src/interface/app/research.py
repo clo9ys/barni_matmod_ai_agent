@@ -244,8 +244,8 @@ async def stream_task(request: Request, task_id: str):
 
 @router.get("/history")
 async def get_history(user: User = Depends(get_current_user), db: Session = Depends(get_session)):
-    # Сортируем по ID по убыванию, чтобы новые были сверху
-    query = select(ResearchTable).where(ResearchTable.user_id == user.id).order_by(ResearchTable.id.desc())
+    # Сортируем по дате создания по убыванию, чтобы новые были сверху
+    query = select(ResearchTable).where(ResearchTable.user_id == user.id).order_by(ResearchTable.created_at.desc())
     return db.exec(query).all()
 
 @router.get("/research/{session_id}")
