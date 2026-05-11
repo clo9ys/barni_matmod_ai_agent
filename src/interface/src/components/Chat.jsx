@@ -1,45 +1,12 @@
 import React, { useState } from 'react';
+import TraceLog from './TraceLog';
 
-export default function Chat({ onSend, disabled }) {
-    const [inputValue, setInputValue] = useState('');
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (inputValue.trim() && !disabled) {
-            onSend(inputValue);
-            setInputValue(''); // Очищаем поле после отправки
-        }
-    };
-
+export default function Chat({ logs }) {
     return (
-        <>
-            <div className="messages-area">
-                <div className="chat-placeholder">
-                    <div className="chat-icon">🤖</div>
-                    <h3 className="chat-title">Виртуальный специалист</h3>
-                    <p className="chat-subtitle">
-                        Опишите задачу, и я помогу спроектировать исследование.
-                    </p>
-                </div>
-                {/* В будущем здесь можно рендерить историю сообщений */}
+        <div className="flex-1 flex flex-col min-h-0 bg-slate-800 overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6 font-mono text-sm border-b border-slate-700">
+                <TraceLog logs={logs} />
             </div>
-
-            <form className="input-area" onSubmit={handleSubmit}>
-                <textarea
-                    rows="2"
-                    placeholder="Например: Собери динамику инфляции по странам ЕС..."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    disabled={disabled}
-                />
-                <button
-                    type="submit"
-                    className="btn-primary"
-                    disabled={disabled}
-                >
-                    {disabled ? 'Думаю...' : 'Отправить'}
-                </button>
-            </form>
-        </>
+        </div>
     );
 }

@@ -1,18 +1,16 @@
 import { useState, useCallback, useRef } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
-export function useAssistant(token) {
+export function useAssistant(token, onNewTask) {
+    const [currentSessionId, setCurrentSessionId] = useState(null);
     const [currentStep, setCurrentStep] = useState(0);
     const [viewStep, setViewStep] = useState(0);
     const [logs, setLogs] = useState([{ text: 'Ожидание запроса...', type: 'dimmed' }]);
     const [artifacts, setArtifacts] = useState({});
     const [isProcessing, setIsProcessing] = useState(false);
-    const [isRefining, setIsRefining] = useState(false);
-    const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
     const [initialQuery, setInitialQuery] = useState('');
     const [sessionId, setSessionId] = useState(null);
 
-    // Refs to cancel the active SSE stream and to know the active task id
     const activeCtrlRef = useRef(null);
     const activeTaskIdRef = useRef(null);
 
@@ -37,14 +35,13 @@ export function useAssistant(token) {
     const resetAssistant = useCallback(() => {
         _abortActive();
         _cancelActiveWorker();
+        setCurrentSessionId(null);
         setCurrentStep(0);
         setViewStep(0);
         setLogs([{ text: 'Ожидание запроса...', type: 'dimmed' }]);
         setArtifacts({});
         setInitialQuery('');
         setIsProcessing(false);
-        setIsRefining(false);
-        setAwaitingConfirmation(false);
         setSessionId(null);
     }, [_abortActive, _cancelActiveWorker]);
 
@@ -52,7 +49,6 @@ export function useAssistant(token) {
         _abortActive();
         _cancelActiveWorker();
         setIsProcessing(true);
-        setAwaitingConfirmation(false);
         try {
             const res = await fetch(`http://localhost:8000/api/v1/research/${sid}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -60,6 +56,7 @@ export function useAssistant(token) {
             const data = await res.json();
 
             setSessionId(sid);
+            setCurrentSessionId(sid);
             setInitialQuery(data.query);
             setCurrentStep(data.current_step);
             setViewStep(data.current_step || 1);
@@ -79,13 +76,17 @@ export function useAssistant(token) {
                     questions: data.definition.clarifying_questions || []
                 };
             }
+
             if (data.assembly_plan?.sources?.length > 0) {
                 const bestDs = data.assembly_plan.sources[0];
                 mappedArtifacts[2] = {
-                    title: bestDs.title, tags: bestDs.tags || [],
-                    description: bestDs.description, url: bestDs.source_url || '#'
+                    title: bestDs.title,
+                    tags: bestDs.tags || [],
+                    description: bestDs.description,
+                    url: bestDs.source_url || '#'
                 };
             }
+
             if (data.design?.hypotheses) {
                 mappedArtifacts[3] = {
                     hypotheses: data.design.hypotheses.map((h, i) => ({
@@ -94,21 +95,22 @@ export function useAssistant(token) {
                     }))
                 };
             }
+
             if (data.assembly_plan?.plan) {
                 const plan = data.assembly_plan.plan;
-                const sources = (plan.primary_sources || []).map(src => ({
-                    dataset_id: src.dataset_id,
-                    indicator: src.indicator_name || src.indicator,
-                    years: src.years_used || src.years,
-                    role: src.role || 'primary',
-                }));
                 mappedArtifacts[4] = {
                     combination_strategy: plan.combination_strategy,
                     join_key: plan.join_key,
                     output_columns: plan.output_schema?.columns || plan.output_columns,
-                    sources,
+                    sources: (plan.primary_sources || []).map(src => ({
+                        dataset_id: src.dataset_id,
+                        indicator: src.indicator_name || src.indicator,
+                        years: src.years_used || src.years,
+                        role: src.role || 'primary',
+                    })),
                 };
             }
+
             if (data.generated_script) mappedArtifacts[5] = { code: data.generated_script };
             if (data.result_data) mappedArtifacts[6] = data.result_data;
 
@@ -123,7 +125,6 @@ export function useAssistant(token) {
     }, [token, _abortActive, _cancelActiveWorker]);
 
     const _subscribeToStream = useCallback(async (taskId) => {
-        // Abort any previous stream
         _abortActive();
 
         const ctrl = new AbortController();
@@ -146,21 +147,13 @@ export function useAssistant(token) {
                             if (data.artifact) {
                                 setArtifacts(prev => ({ ...prev, [data.step]: data.artifact }));
                             }
-                        } else if (data.type === 'awaiting_confirmation') {
-                            setIsProcessing(false);
-                            setIsRefining(false);
-                            setAwaitingConfirmation(true);
                         } else if (data.type === 'done') {
                             setIsProcessing(false);
-                            setIsRefining(false);
-                            setAwaitingConfirmation(false);
                             setLogs(prev => [...prev, { text: 'Анализ завершен', type: 'dimmed' }]);
                             activeTaskIdRef.current = null;
                             ctrl.abort();
                         } else if (data.type === 'error') {
                             setIsProcessing(false);
-                            setIsRefining(false);
-                            setAwaitingConfirmation(false);
                             setLogs(prev => [...prev, { text: `Ошибка: ${data.message}`, type: 'error' }]);
                             activeTaskIdRef.current = null;
                             ctrl.abort();
@@ -172,8 +165,6 @@ export function useAssistant(token) {
                 onerror(err) {
                     if (err.name === 'AbortError') return;
                     setIsProcessing(false);
-                    setIsRefining(false);
-                    setAwaitingConfirmation(false);
                     throw err;
                 }
             });
@@ -181,8 +172,6 @@ export function useAssistant(token) {
             if (error.name !== 'AbortError') {
                 setLogs(prev => [...prev, { text: `Ошибка потока: ${error.message}`, type: 'error' }]);
                 setIsProcessing(false);
-                setIsRefining(false);
-                setAwaitingConfirmation(false);
             }
         } finally {
             if (activeCtrlRef.current === ctrl) {
@@ -198,14 +187,13 @@ export function useAssistant(token) {
         _cancelActiveWorker();
 
         setIsProcessing(true);
-        setIsRefining(false);
-        setAwaitingConfirmation(false);
         setInitialQuery(message);
         setLogs([{ text: 'Запуск задачи...', type: 'normal' }]);
         setArtifacts({});
         setCurrentStep(0);
         setViewStep(0);
         setSessionId(null);
+        setCurrentSessionId(null);
 
         try {
             const response = await fetch('http://localhost:8000/api/v1/chat', {
@@ -216,6 +204,8 @@ export function useAssistant(token) {
             if (!response.ok) throw new Error('Ошибка запуска');
             const { task_id, session_id } = await response.json();
             setSessionId(session_id || task_id);
+            setCurrentSessionId(task_id);
+            if (onNewTask) onNewTask();
             await _subscribeToStream(task_id);
         } catch (error) {
             if (error.name !== 'AbortError') {
@@ -223,64 +213,13 @@ export function useAssistant(token) {
                 setIsProcessing(false);
             }
         }
-    }, [token, _subscribeToStream, _abortActive, _cancelActiveWorker]);
-
-    const confirmStep = useCallback(async () => {
-        const taskId = activeTaskIdRef.current;
-        if (!taskId) return;
-        setAwaitingConfirmation(false);
-        setIsProcessing(true);
-        try {
-            await fetch(`http://localhost:8000/api/v1/stream/${taskId}/continue`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-        } catch (e) {
-            console.error('Ошибка подтверждения шага', e);
-        }
-    }, [token]);
-
-    const refineFromStep = useCallback(async (fromStep, correction) => {
-        if (!sessionId) return;
-
-        // Cancel paused worker and abort SSE
-        _cancelActiveWorker();
-        _abortActive();
-
-        setAwaitingConfirmation(false);
-        setIsRefining(true);
-        setIsProcessing(true);
-        setArtifacts(prev => {
-            const next = { ...prev };
-            for (let s = fromStep; s <= 6; s++) delete next[s];
-            return next;
-        });
-        setCurrentStep(fromStep - 1);
-        setViewStep(fromStep);
-        setLogs(prev => [...prev, { text: `🔄 Уточнение с шага ${fromStep}...`, type: 'normal' }]);
-
-        try {
-            const response = await fetch(`http://localhost:8000/api/v1/research/${sessionId}/refine`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ from_step: fromStep, correction })
-            });
-            if (!response.ok) throw new Error('Ошибка запуска уточнения');
-            const { task_id } = await response.json();
-            await _subscribeToStream(task_id);
-        } catch (error) {
-            if (error.name !== 'AbortError') {
-                setLogs(prev => [...prev, { text: `Ошибка: ${error.message}`, type: 'error' }]);
-                setIsRefining(false);
-                setIsProcessing(false);
-            }
-        }
-    }, [sessionId, token, _subscribeToStream, _abortActive, _cancelActiveWorker]);
+    }, [token, _subscribeToStream, _abortActive, _cancelActiveWorker, onNewTask]);
 
     return {
+        currentSessionId,
         currentStep, viewStep, setViewStep,
-        logs, artifacts, isProcessing, isRefining, awaitingConfirmation,
+        logs, artifacts, isProcessing,
         initialQuery, sessionId,
-        sendMessage, loadResearch, resetAssistant, confirmStep, refineFromStep
+        sendMessage, loadResearch, resetAssistant
     };
 }

@@ -1,24 +1,25 @@
 import React from 'react';
 
 export default function ScriptCard({ data }) {
-    if (!data || !data.code) return <p className="dimmed">Код еще не сгенерирован...</p>;
+    if (!data || !data.code) return (
+        <div className="card border-dashed border-2 flex items-center justify-center py-12">
+            <p className="text-soft-muted text-sm italic">Код еще не сгенерирован...</p>
+        </div>
+    );
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <h4>Скрипт сборки данных (Python)</h4>
+        <div className="card p-0 overflow-hidden">
+            <div className="px-6 py-4 border-b border-soft-border bg-soft-sidebar/30 flex items-center justify-between">
+                <h4 className="text-sm font-bold text-soft-text uppercase tracking-tight">Скрипт сборки данных (Python)</h4>
+                <button 
+                    onClick={() => navigator.clipboard.writeText(data.code)}
+                    className="text-[10px] font-bold text-soft-accent hover:underline uppercase"
+                >
+                    Копировать
+                </button>
             </div>
-            <div className="card-body">
-                <pre style={{
-                    background: '#1a1a1a',
-                    padding: '15px',
-                    borderRadius: '8px',
-                    overflowX: 'auto',
-                    color: '#e2e8f0',
-                    fontFamily: 'monospace',
-                    fontSize: '14px',
-                    border: '1px solid rgba(222, 255, 154, 0.2)'
-                }}>
+            <div className="p-6 bg-slate-900">
+                <pre className="text-xs font-mono text-slate-300 overflow-x-auto leading-relaxed scrollbar-thin scrollbar-thumb-slate-700">
                     <code>{data.code}</code>
                 </pre>
             </div>

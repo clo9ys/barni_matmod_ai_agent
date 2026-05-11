@@ -89,6 +89,12 @@ requires-dist = [
     { name = "faiss-cpu", specifier = ">=1.13.2" },
     { name = "fastapi", specifier = ">=0.136.1" },
     { name = "httpx", specifier = ">=0.28.1" },
+<<<<<<< HEAD
+=======
+    { name = "langchain", specifier = ">=1.2.18" },
+    { name = "langchain-openai", specifier = ">=1.2.1" },
+    { name = "matplotlib", specifier = ">=3.9.0" },
+>>>>>>> origin/develop
     { name = "matplotlib", specifier = ">=3.10.9" },
     { name = "numpy", specifier = ">=2.0.0" },
     { name = "openai", specifier = ">=2.36.0" },

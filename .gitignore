@@ -249,6 +249,9 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 */*.db
+.db
+*.db
+
 
 # Flask stuff:
 instance/
@@ -423,3 +426,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+outputs
+*/outputs
+
+*/fedstatru
+*/wb
