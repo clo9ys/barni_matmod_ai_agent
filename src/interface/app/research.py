@@ -121,6 +121,13 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             if archive_root:
                 errors = validate_assembly_plan(assembly_plan, archive_root=archive_root)
                 if errors:
+                    sync_push({"type": "log", "message": "⚠️ Валидация не прошла, исправляю план..."})
+                    assembly_plan = complete_json(build_assembly_plan_messages(
+                        query, extracted_params, top_datasets, research_design,
+                        validation_errors=errors,
+                    ))
+                    errors = validate_assembly_plan(assembly_plan, archive_root=archive_root)
+                if errors:
                     sync_push({"type": "error", "message": f"Ошибка валидации плана: {errors}"})
                     return
 
