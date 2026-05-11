@@ -51,11 +51,22 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 sync_push({"type": "error", "message": "Тема вне компетенции агента."})
                 return
 
+            time_period = extracted_params.get("time_period", {})
+            start_year = time_period.get("start")
+            end_year = time_period.get("end")
+
+            if start_year and end_year:
+                timeframe_str = f"{start_year}-{end_year}" if start_year != end_year else str(start_year)
+            elif start_year or end_year:
+                timeframe_str = str(start_year or end_year)
+            else:
+                timeframe_str = "Не задано"
+
             sync_push({
                 "type": "step_update", "step": 1,
                 "artifact": {
                     "geography": ", ".join(extracted_params.get("geography", [])),
-                    "timeframe": f"{extracted_params.get('time_period', {}).get('start', '...')}",
+                    "timeframe": timeframe_str,
                     "perspective": extracted_params.get("subject_area", "Экономика"),
                     "questions": extracted_params.get("clarifying_questions", [])
                 }
