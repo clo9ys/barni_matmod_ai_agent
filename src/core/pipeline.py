@@ -60,7 +60,7 @@ def _merge_candidates(
 
 # Minimum rerank score for any dataset to be considered relevant.
 # If the best candidate is below this threshold, we treat it as no_data.
-NO_DATA_RERANK_THRESHOLD = 0.05  # cross-encoder sigmoid scores are low by nature; FAISS is the primary quality gate
+NO_DATA_RERANK_THRESHOLD = 0.0  # WB datasets score low (~0.008) because they're indexed as "world, countries" without specific countries; FAISS is the primary quality gate
 
 
 def run(
