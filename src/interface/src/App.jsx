@@ -3,7 +3,6 @@ import './styles.css';
 import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
 import ArtifactViewer from './components/ArtifactViewer';
-import TraceLog from './components/TraceLog';
 import Stepper from './components/Stepper';
 import Auth from './components/Auth';
 import { useAssistant } from './hooks/useAssistant';
@@ -15,6 +14,7 @@ export default function App() {
   const [inputValue, setInputValue] = useState('');
 
   const {
+    currentSessionId,
     currentStep, viewStep, setViewStep,
     logs, artifacts, isProcessing,
     initialQuery, sendMessage, loadResearch, resetAssistant
@@ -34,6 +34,7 @@ export default function App() {
       <div className="flex h-screen overflow-hidden bg-soft-bg text-soft-text">
         <Sidebar
             token={token}
+            currentSessionId={currentSessionId}
             onLogout={() => { localStorage.removeItem('access_token'); setToken(null); }}
             onHistoryClick={loadResearch}
             onNewChat={resetAssistant}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Sidebar({ token, onLogout, onHistoryClick, onNewChat }) {
+export default function Sidebar({ token, currentSessionId, onLogout, onHistoryClick, onNewChat }) {
     const [history, setHistory] = useState([]);
 
     const fetchHistory = async () => {
@@ -14,6 +14,26 @@ export default function Sidebar({ token, onLogout, onHistoryClick, onNewChat }) 
             }
         } catch (err) {
             console.error("Failed to load history", err);
+        }
+    };
+
+    const handleDelete = async (e, sessionId) => {
+        e.stopPropagation(); // Чтобы не сработало нажатие на сам айтем
+        if (!window.confirm("Удалить это исследование?")) return;
+
+        try {
+            const res = await fetch(`http://localhost:8000/api/v1/research/${sessionId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                fetchHistory(); // Обновляем список
+                if (currentSessionId === sessionId) {
+                    onNewChat(); // Если удалили текущий чат, сбрасываем экран
+                }
+            }
+        } catch (err) {
+            console.error("Failed to delete research", err);
         }
     };
 
@@ -41,20 +61,37 @@ export default function Sidebar({ token, onLogout, onHistoryClick, onNewChat }) 
                     История исследований
                 </p>
                 <ul className="space-y-1">
-                    {history.map((item) => (
-                        <li
-                            key={item.session_id}
-                            className="p-3 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer transition-all border border-transparent hover:border-soft-border group"
-                            onClick={() => onHistoryClick(item.session_id)}
-                        >
-                            <span className="block text-[10px] font-bold text-soft-accent mb-1">
-                                ШАГ {item.current_step}/7
-                            </span>
-                            <span className="block text-sm text-soft-text truncate group-hover:text-soft-accent transition-colors">
-                                {item.query}
-                            </span>
-                        </li>
-                    ))}
+                    {history.map((item) => {
+                        const isActive = item.session_id === currentSessionId;
+                        return (
+                            <li
+                                key={item.session_id}
+                                className={`p-3 rounded-lg cursor-pointer transition-all border group relative pr-10 ${
+                                    isActive 
+                                    ? 'bg-white shadow-sm border-soft-border' 
+                                    : 'hover:bg-white hover:shadow-sm border-transparent hover:border-soft-border'
+                                }`}
+                                onClick={() => onHistoryClick(item.session_id)}
+                            >
+                                <span className="block text-[10px] font-bold text-soft-accent mb-1">
+                                    ШАГ {item.current_step}/7
+                                </span>
+                                <span className={`block text-sm truncate transition-colors ${
+                                    isActive ? 'text-soft-accent font-medium' : 'text-soft-text group-hover:text-soft-accent'
+                                }`}>
+                                    {item.query}
+                                </span>
+                                
+                                <button
+                                    onClick={(e) => handleDelete(e, item.session_id)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-soft-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                    title="Удалить"
+                                >
+                                    🗑️
+                                </button>
+                            </li>
+                        );
+                    })}
                 </ul>
             </div>
 

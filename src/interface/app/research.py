@@ -16,7 +16,6 @@ from src.ml.model import complete_json, is_llm_configured
 from src.ml.prompts import build_extract_params_messages, build_research_design_messages, build_assembly_plan_messages
 from src.ml.rag import FULL_FAISS_INDEX_PATH, FULL_METADATA_PATH, search_datasets
 from src.ml.reranker import rerank_datasets
-from src.tools.readers import read_fedstatru_coverage
 from src.tools.validator import validate_assembly_plan
 from src.ml.codegen import generate_analysis_code
 from src.core.pipeline import _build_english_query, _merge_candidates, NO_DATA_RERANK_THRESHOLD
@@ -252,6 +251,31 @@ async def get_research_detail(session_id: str, user: User = Depends(get_current_
     res = db.exec(select(ResearchTable).where(ResearchTable.session_id == session_id, ResearchTable.user_id == user.id)).first()
     if not res: raise HTTPException(status_code=404)
     return res
+
+@router.delete("/research/{session_id}")
+async def delete_research(session_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_session)):
+    res = db.exec(select(ResearchTable).where(ResearchTable.session_id == session_id, ResearchTable.user_id == user.id)).first()
+    if not res: 
+        raise HTTPException(status_code=404, detail="Исследование не найдено")
+    
+    # Удаляем запись из БД
+    db.delete(res)
+    db.commit()
+
+    # Попытка удалить файлы (результат и временный скрипт)
+    output_dir = Path(__file__).parent.parent.parent.parent / "data" / "outputs"
+    output_file = output_dir / f"{session_id}.csv"
+    script_file = output_dir / f"script_{session_id}.py"
+    
+    try:
+        if output_file.exists():
+            output_file.unlink()
+        if script_file.exists():
+            script_file.unlink()
+    except Exception as e:
+        print(f"Ошибка при удалении файлов: {e}")
+
+    return {"status": "ok"}
 
 @router.get("/download/{filename}")
 async def download_file(filename: str):

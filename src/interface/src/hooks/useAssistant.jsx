@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 export function useAssistant(token) {
+    const [currentSessionId, setCurrentSessionId] = useState(null);
     const [currentStep, setCurrentStep] = useState(0);
     const [viewStep, setViewStep] = useState(0);
     const [logs, setLogs] = useState([{ text: 'Ожидание запроса...', type: 'dimmed' }]);
@@ -10,6 +11,7 @@ export function useAssistant(token) {
     const [initialQuery, setInitialQuery] = useState('');
 
     const resetAssistant = useCallback(() => {
+        setCurrentSessionId(null);
         setCurrentStep(0);
         setViewStep(0);
         setLogs([{ text: 'Ожидание запроса...', type: 'dimmed' }]);
@@ -20,6 +22,7 @@ export function useAssistant(token) {
 
     const loadResearch = useCallback(async (sessionId) => {
         setIsProcessing(true);
+        setCurrentSessionId(sessionId);
         try {
             const res = await fetch(`http://localhost:8000/api/v1/research/${sessionId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -114,6 +117,7 @@ export function useAssistant(token) {
 
             if (!response.ok) throw new Error('Ошибка запуска');
             const { task_id } = await response.json();
+            setCurrentSessionId(task_id);
 
             await fetchEventSource(`http://localhost:8000/api/v1/stream/${task_id}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
@@ -161,6 +165,7 @@ export function useAssistant(token) {
     }, [token]);
 
     return {
+        currentSessionId,
         currentStep, viewStep, setViewStep,
         logs, artifacts, isProcessing,
         initialQuery, sendMessage, loadResearch, resetAssistant
