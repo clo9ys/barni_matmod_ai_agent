@@ -423,3 +423,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+outputs
