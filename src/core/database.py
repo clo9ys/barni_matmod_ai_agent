@@ -42,6 +42,7 @@ class ResearchTable(SQLModel, table=True):
     # дополнительные артефакты
     generated_script: Optional[str] = None
     final_dataset_url: Optional[str] = None
+    result_data: Optional[dict] = Field(default=None, sa_column=Column(JSON))
 
     # логирование "следа ассистента" и ошибок
     trace: List[str] = Field(default_factory=list, sa_column=Column(JSON))
