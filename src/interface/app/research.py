@@ -243,8 +243,10 @@ async def stream_task(request: Request, task_id: str):
     return EventSourceResponse(event_generator())
 
 @router.get("/history")
-async def get_history(user: User = Depends(get_current_user)):
-    return user.researches
+async def get_history(user: User = Depends(get_current_user), db: Session = Depends(get_session)):
+    # Сортируем по ID по убыванию, чтобы новые были сверху
+    query = select(ResearchTable).where(ResearchTable.user_id == user.id).order_by(ResearchTable.id.desc())
+    return db.exec(query).all()
 
 @router.get("/research/{session_id}")
 async def get_research_detail(session_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_session)):

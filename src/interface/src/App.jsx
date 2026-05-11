@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './styles.css';
 import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
@@ -12,13 +12,16 @@ const STEPS = ['Запрос', 'Определение', 'Источники', '
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('access_token'));
   const [inputValue, setInputValue] = useState('');
+  const sidebarRef = useRef(null);
 
   const {
     currentSessionId,
     currentStep, viewStep, setViewStep,
     logs, artifacts, isProcessing,
     initialQuery, sendMessage, loadResearch, resetAssistant
-  } = useAssistant(token);
+  } = useAssistant(token, () => {
+    sidebarRef.current?.refreshHistory();
+  });
 
   if (!token) return <Auth onLogin={(t) => { localStorage.setItem('access_token', t); setToken(t); }} />;
 
@@ -33,6 +36,7 @@ export default function App() {
   return (
       <div className="flex h-screen overflow-hidden bg-soft-bg text-soft-text">
         <Sidebar
+            ref={sidebarRef}
             token={token}
             currentSessionId={currentSessionId}
             onLogout={() => { localStorage.removeItem('access_token'); setToken(null); }}

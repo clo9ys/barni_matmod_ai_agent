@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
-export function useAssistant(token) {
+export function useAssistant(token, onNewTask) {
     const [currentSessionId, setCurrentSessionId] = useState(null);
     const [currentStep, setCurrentStep] = useState(0);
     const [viewStep, setViewStep] = useState(0);
@@ -118,6 +118,8 @@ export function useAssistant(token) {
             if (!response.ok) throw new Error('Ошибка запуска');
             const { task_id } = await response.json();
             setCurrentSessionId(task_id);
+            
+            if (onNewTask) onNewTask();
 
             await fetchEventSource(`http://localhost:8000/api/v1/stream/${task_id}`, {
                 headers: { 'Authorization': `Bearer ${token}` },

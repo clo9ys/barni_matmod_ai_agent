@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 
-export default function Sidebar({ token, currentSessionId, onLogout, onHistoryClick, onNewChat }) {
+const Sidebar = forwardRef(({ token, currentSessionId, onLogout, onHistoryClick, onNewChat }, ref) => {
     const [history, setHistory] = useState([]);
 
     const fetchHistory = async () => {
@@ -16,6 +16,10 @@ export default function Sidebar({ token, currentSessionId, onLogout, onHistoryCl
             console.error("Failed to load history", err);
         }
     };
+
+    useImperativeHandle(ref, () => ({
+        refreshHistory: fetchHistory
+    }));
 
     const handleDelete = async (e, sessionId) => {
         e.stopPropagation(); // Чтобы не сработало нажатие на сам айтем
@@ -105,4 +109,6 @@ export default function Sidebar({ token, currentSessionId, onLogout, onHistoryCl
             </div>
         </aside>
     );
-}
+});
+
+export default Sidebar;
