@@ -7,7 +7,6 @@ export default function Auth({ onLogin }) {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Вспомогательная функция для логина, чтобы не дублировать код
     const loginUser = async (user, pass) => {
         const formData = new URLSearchParams();
         formData.append('username', user);
@@ -22,7 +21,7 @@ export default function Auth({ onLogin }) {
         if (!res.ok) throw new Error('Неверный логин или пароль');
 
         const data = await res.json();
-        onLogin(data.access_token); // Передаем токен наверх в App.jsx
+        onLogin(data.access_token);
     };
 
     const handleSubmit = async (e) => {
@@ -32,60 +31,91 @@ export default function Auth({ onLogin }) {
 
         try {
             if (isLoginMode) {
-                // Обычный вход
                 await loginUser(username, password);
             } else {
-                // Регистрация
                 const res = await fetch(`http://localhost:8000/api/v1/auth/register?username=${username}&password=${password}`, {
                     method: 'POST'
                 });
 
                 if (!res.ok) throw new Error('Пользователь уже существует');
-
-                // Если регистрация успешна (200 OK), сразу же логиним пользователя!
                 await loginUser(username, password);
             }
         } catch (err) {
             setError(err.message);
-            setLoading(false); // Выключаем загрузку только если была ошибка
+            setLoading(false);
         }
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2>{isLoginMode ? 'Вход в систему' : 'Регистрация'}</h2>
-                <p className="auth-subtitle">ИИ-ассистент НЦСЭД</p>
+        <div className="min-h-screen flex items-center justify-center bg-soft-bg p-4 font-sans text-soft-text">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl shadow-soft-border border border-soft-border overflow-hidden">
+                <div className="p-8 text-center bg-soft-sidebar/50 border-b border-soft-border">
+                    <h1 className="text-3xl font-black tracking-tighter text-soft-accent mb-1">БАРНИ</h1>
+                    <p className="text-soft-muted text-sm font-medium">Ассистент проектирования исследований</p>
+                </div>
+                
+                <div className="p-8">
+                    <h2 className="text-xl font-bold mb-6 text-center">
+                        {isLoginMode ? 'Вход в систему' : 'Регистрация'}
+                    </h2>
 
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        placeholder="Логин"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Пароль"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Логин"
+                                className="w-full px-4 py-3 bg-soft-bg border border-soft-border rounded-xl focus:ring-2 focus:ring-soft-accent/20 focus:border-soft-accent outline-none transition-all"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <input
+                                type="password"
+                                placeholder="Пароль"
+                                className="w-full px-4 py-3 bg-soft-bg border border-soft-border rounded-xl focus:ring-2 focus:ring-soft-accent/20 focus:border-soft-accent outline-none transition-all"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                    {error && <div className="auth-error">{error}</div>}
+                        {error && (
+                            <div className="p-3 bg-red-50 text-red-500 text-xs font-semibold rounded-lg border border-red-100 animate-pulse">
+                                ⚠️ {error}
+                            </div>
+                        )}
 
-                    <button type="submit" className="btn-primary auth-submit-btn" disabled={loading}>
-                        {loading ? 'Загрузка...' : (isLoginMode ? 'Войти' : 'Зарегистрироваться')}
-                    </button>
-                </form>
+                        <button 
+                            type="submit" 
+                            className="w-full py-4 bg-soft-accent text-white font-bold rounded-xl shadow-lg shadow-soft-accent/20 hover:bg-sky-600 active:scale-[0.98] transition-all disabled:opacity-50"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Загрузка...
+                                </span>
+                            ) : (
+                                isLoginMode ? 'Войти' : 'Создать аккаунт'
+                            )}
+                        </button>
+                    </form>
 
-                <p className="auth-switch" onClick={() => {
-                    setIsLoginMode(!isLoginMode);
-                    setError(''); // Очищаем ошибки при переключении режима
-                }}>
-                    {isLoginMode ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войти'}
-                </p>
+                    <div className="mt-8 pt-6 border-t border-soft-border text-center">
+                        <button 
+                            type="button"
+                            className="text-sm font-semibold text-soft-muted hover:text-soft-accent transition-colors"
+                            onClick={() => {
+                                setIsLoginMode(!isLoginMode);
+                                setError('');
+                            }}
+                        >
+                            {isLoginMode ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войти'}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );

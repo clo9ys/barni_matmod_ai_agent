@@ -3,16 +3,20 @@ import React, { useEffect, useRef } from 'react';
 export default function TraceLog({ logs }) {
     const endRef = useRef(null);
 
-    // Автоматически скроллим вниз при появлении нового лога
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [logs]);
 
     return (
-        <div>
+        <div className="space-y-1">
             {logs.map((log, index) => (
-                <p key={index} className={`log-entry ${log.type === 'dimmed' ? 'dimmed' : ''}`}>
-                    &gt; {log.text}
+                <p key={index} className={`
+                    leading-relaxed
+                    ${log.type === 'dimmed' ? 'text-slate-500' : 
+                      log.type === 'error' ? 'text-red-400' : 'text-sky-400'}
+                `}>
+                    <span className="opacity-50 mr-2">❯</span>
+                    {log.text}
                 </p>
             ))}
             <div ref={endRef} />

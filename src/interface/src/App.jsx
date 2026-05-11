@@ -22,7 +22,7 @@ export default function App() {
   if (!token) return <Auth onLogin={(t) => { localStorage.setItem('access_token', t); setToken(t); }} />;
 
   return (
-      <div className="app-layout">
+      <div className="flex h-screen overflow-hidden bg-soft-bg text-soft-text">
         <Sidebar
             token={token}
             onLogout={() => { localStorage.removeItem('access_token'); setToken(null); }}
@@ -30,17 +30,17 @@ export default function App() {
             onNewChat={resetAssistant}
         />
 
-        <div className="main-area">
-          <header className="top-bar">
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="h-16 bg-white border-b border-soft-border flex items-center px-6 shrink-0">
             <Stepper steps={STEPS} current={currentStep} selected={viewStep} onSelect={setViewStep} />
           </header>
 
-          <div className="workspace">
-            <section className="chat-panel">
+          <div className="flex-1 flex overflow-hidden">
+            <section className="flex-1 flex flex-col border-r border-soft-border bg-white">
               <Chat onSend={sendMessage} disabled={isProcessing} query={initialQuery} />
             </section>
 
-            <section className="artifact-panel">
+            <section className="flex-1 overflow-y-auto p-8 bg-soft-bg">
               <ArtifactViewer
                   step={viewStep}
                   data={artifacts[viewStep]}
@@ -49,7 +49,7 @@ export default function App() {
             </section>
           </div>
 
-          <footer className="trace-log">
+          <footer className="h-40 bg-slate-900 text-sky-400 font-mono p-4 overflow-y-auto border-t border-slate-800 shrink-0 text-sm">
             <TraceLog logs={logs} />
           </footer>
         </div>
