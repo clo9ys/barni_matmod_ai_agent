@@ -1,0 +1,39 @@
+{
+  "query_type": "comparative",
+  "original_query": "Динамика доли городского населения и общего коэффициента рождаемости по странам мира за 2010–2022. Источник: World Bank.",
+  "english_query": "Urban population share and total fertility rate by country worldwide, 2010–2022",
+  "geography": [
+    "world"
+  ],
+  "time_period": {
+    "start": 2010,
+    "end": 2022
+  },
+  "indicators": [
+    "urban_population_share",
+    "total_fertility_rate"
+  ],
+  "subject_area": "demography",
+  "units": [
+    "percent",
+    "births_per_woman"
+  ],
+  "filters": {
+    "countries": [],
+    "regions": [],
+    "sectors": [],
+    "population_groups": []
+  },
+  "needs_clarification": false,
+  "clarifying_questions": [],
+  "assumptions": [
+    "Под 'долей городского населения' подразумевается доля городского населения в общей численности населения страны.",
+    "Под 'общим коэффициентом рождаемости' подразумевается среднее число детей, которое родит одна женщина за всю репродуктивную жизнь при сохранении текущих уровней рождаемости.",
+    "Данные предполагаются на уровне стран, доступных в базе Всемирного банка за указанный период."
+  ],
+  "data_requirements": [
+    "Ежегодные данные по доле городского населения (в %) для всех стран мира за 2010–2022 гг.",
+    "Ежегодные данные по общему коэффициенту рождаемости (в births per woman) для всех стран мира за 2010–2022 гг.",
+    "Источник: официальная база данных Всемирного банка (World Development Indicators)"
+  ]
+}

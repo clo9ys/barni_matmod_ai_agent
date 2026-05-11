@@ -1,0 +1,264 @@
+[
+  {
+    "id": "fedstatru_62685",
+    "title": "Индекс потребительских цен (годовое изменение, процентов)",
+    "description": "Индекс потребительских цен (годовое изменение, процентов)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/62685",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс потребительских цен (годовое изменение, процентов)",
+        "code": "62685",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "62685"
+    ],
+    "text_for_embedding": "Индекс потребительских цен (годовое изменение, процентов)\nИндекс потребительских цен (годовое изменение, процентов)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс потребительских цен (годовое изменение, процентов) 62685 * процент\ndimensions: \ntags: росстат, россия, fedstat, 62685",
+    "file_path": "fedstatru/data/parquet/62685.parquet",
+    "indicator_code": "62685",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8786511421203613,
+    "rerank_score": 0.6175860166549683,
+    "rerank_reason": "",
+    "available_coverage": {
+      "62 декабрь": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "118 январь-декабрь": [
+        2017
+      ],
+      "1558883 значение показателя за год": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ]
+    }
+  },
+  {
+    "id": "fedstatru_51644",
+    "title": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+    "description": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/51644",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+        "code": "51644",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "51644"
+    ],
+    "text_for_embedding": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)\nИндекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года) 51644 * процент\ndimensions: \ntags: росстат, россия, fedstat, 51644",
+    "file_path": "fedstatru/data/parquet/51644.parquet",
+    "indicator_code": "51644",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8724681735038757,
+    "rerank_score": 0.25344839692115784,
+    "rerank_reason": "",
+    "available_coverage": {
+      "744 процент": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ]
+    }
+  },
+  {
+    "id": "fedstatru_57738",
+    "title": "Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.",
+    "description": "Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/57738",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.",
+        "code": "57738",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "57738"
+    ],
+    "text_for_embedding": "Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.\nОценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г. 57738 * процент\ndimensions: \ntags: росстат, россия, fedstat, 57738",
+    "file_path": "fedstatru/data/parquet/57738.parquet",
+    "indicator_code": "57738",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8492661714553833,
+    "rerank_score": 0.24266789853572845,
+    "rerank_reason": "",
+    "available_coverage": {
+      "744 процент": [
+        2024
+      ]
+    }
+  },
+  {
+    "id": "fedstatru_55396",
+    "title": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+    "description": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/55396",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+        "code": "55396",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "55396"
+    ],
+    "text_for_embedding": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)\nИндекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года) 55396 * процент\ndimensions: \ntags: росстат, россия, fedstat, 55396",
+    "file_path": "fedstatru/data/parquet/55396.parquet",
+    "indicator_code": "55396",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8728547096252441,
+    "rerank_score": 0.2409239113330841,
+    "rerank_reason": "",
+    "available_coverage": {
+      "744 процент": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ]
+    }
+  },
+  {
+    "id": "fedstatru_57736",
+    "title": "Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.",
+    "description": "Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/57736",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.",
+        "code": "57736",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "57736"
+    ],
+    "text_for_embedding": "Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.\nОценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г. 57736 * процент\ndimensions: \ntags: росстат, россия, fedstat, 57736",
+    "file_path": "fedstatru/data/parquet/57736.parquet",
+    "indicator_code": "57736",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8765982389450073,
+    "rerank_score": 0.2354607880115509,
+    "rerank_reason": "",
+    "available_coverage": {
+      "744 процент": [
+        2024
+      ]
+    }
+  }
+]

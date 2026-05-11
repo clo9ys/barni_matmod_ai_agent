@@ -22,7 +22,7 @@ def _fake_rerank_high(query, candidates, *, top_k=5):
 
 def _fake_rerank_low(query, candidates, *, top_k=5):
     """All scores below threshold — simulates no relevant data."""
-    return [{"id": "ds1", "title": "Dataset 1", "rerank_score": 0.1, "rerank_reason": "not relevant"}]
+    return [{"id": "ds1", "title": "Dataset 1", "rerank_score": 0.01, "rerank_reason": "not relevant"}]
 
 
 def _fake_research_design(*_args, **_kwargs):

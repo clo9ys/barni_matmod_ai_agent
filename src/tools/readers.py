@@ -210,21 +210,29 @@ def read_fedstatru_periods(path: str | Path, okato: str = "643") -> list[str]:
 
 def read_wb_parquet(
     path: str | Path,
-    countryiso3: str = "RUS",
+    countryiso3: str | None = "RUS",
     years: list[int] | None = None,
 ) -> pd.DataFrame:
     """Read a World Bank long-format parquet file.
 
-    Columns: indicator_id, indicator_name, country_id, country_name,
-             countryiso3code, date, value, unit, obs_status, decimal.
-    Returns DataFrame with columns: year (int), value (float).
+    When countryiso3 is a string (e.g. 'RUS'), filters to that country and
+    returns columns: year (int), value (float).
+
+    When countryiso3 is None, returns all countries with columns:
+    country (ISO3 str), year (int), value (float).
     """
     df = pd.read_parquet(path)
-    df = df[df["countryiso3code"] == countryiso3].copy()
+    if countryiso3 is not None:
+        df = df[df["countryiso3code"] == countryiso3].copy()
+    else:
+        df = df.copy()
     df["year"] = pd.to_numeric(df["date"], errors="coerce").astype("Int64")
     df = df.dropna(subset=["year", "value"])
     df["value"] = pd.to_numeric(df["value"], errors="coerce")
     df = df.dropna(subset=["value"])
     if years:
         df = df[df["year"].isin(years)]
+    if countryiso3 is None:
+        df = df.rename(columns={"countryiso3code": "country"})
+        return df[["country", "year", "value"]].reset_index(drop=True)
     return df[["year", "value"]].reset_index(drop=True)

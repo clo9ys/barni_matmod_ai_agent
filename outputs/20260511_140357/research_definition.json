@@ -1,0 +1,42 @@
+{
+  "query_type": "derived_metric",
+  "original_query": "Покажи реальные располагаемые доходы населения России с поправкой на инфляцию, индекс к 2014 году = 100.",
+  "english_query": "real disposable income of population Russia index 2014=100",
+  "geography": [
+    "Russia"
+  ],
+  "time_period": {
+    "start": null,
+    "end": null
+  },
+  "indicators": [
+    "real disposable income",
+    "inflation index"
+  ],
+  "subject_area": "macroeconomics",
+  "units": [
+    "index 2014=100"
+  ],
+  "filters": {
+    "countries": [
+      "Russia"
+    ],
+    "regions": [],
+    "sectors": [],
+    "population_groups": [
+      "population"
+    ]
+  },
+  "needs_clarification": false,
+  "clarifying_questions": [],
+  "assumptions": [
+    "Реальные располагаемые доходы рассчитываются как номинальные доходы, скорректированные на индекс потребительских цен (инфляцию).",
+    "Базовый год 2014 установлен как 100 для индексации.",
+    "Показатель относится ко всему населению России.",
+    "Данные предполагаются в сопоставимых ценах, с ежегодной перебазировкой при необходимости."
+  ],
+  "data_requirements": [
+    "nominal disposable income of population (Russia, annual)",
+    "consumer price index (Russia, annual, with 2014=100 or convertible to it)"
+  ]
+}
