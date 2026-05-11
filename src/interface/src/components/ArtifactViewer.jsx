@@ -2,30 +2,37 @@ import React from 'react';
 import ResearchDefinitionCard from './cards/ResearchDefinitionCard';
 import HypothesisCard from './cards/HypothesisCard';
 import SourceCard from './cards/SourceCard';
+import ScriptCard from './cards/ScriptCard';
+import ResultCard from './cards/ResultCard';
 
-export default function ArtifactViewer({ currentStep, artifactData }) {
+export default function ArtifactViewer({ step, data, query }) {
     const renderArtifact = () => {
-        if (!artifactData && currentStep !== 0) return <p>Ожидание данных этапа...</p>;
+        // Шаг 0: Запрос
+        if (step === 0) {
+            return (
+                <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+                    <h3 style={{ marginBottom: '10px', color: '#deff9a' }}>Ваш запрос:</h3>
+                    <p style={{ fontSize: '18px', lineHeight: '1.5' }}>{query || "Ожидание ввода..."}</p>
+                </div>
+            );
+        }
 
-        switch (currentStep) {
-            case 0: return <p>Опишите задачу, чтобы начать.</p>;
-            case 1:
-                // Step 1: Определение (geography, timeframe, perspective, questions)
-                return <ResearchDefinitionCard data={artifactData} />;
-            case 2:
-                // Step 2: Гипотезы (hypotheses: [{title, metrics}])
-                return <HypothesisCard hypotheses={artifactData.hypotheses} />;
-            case 4:
-                // Step 4: Источники (title, tags, description, url)
-                return <SourceCard source={artifactData} />;
-            default:
-                return <p>Шаг {currentStep} находится в обработке...</p>;
+        if (!data) return <p className="dimmed" style={{ marginTop: '20px' }}>Данные для этого этапа еще не получены...</p>;
+
+        switch (step) {
+            case 1: return <ResearchDefinitionCard data={data} />;
+            case 2: return <SourceCard source={data} />;
+            case 3: return <HypothesisCard hypotheses={data.hypotheses} />;
+            case 4: return <p className="dimmed">План сборки данных успешно прошел валидацию.</p>;
+            case 5: return <ScriptCard data={data} />;
+            case 6: return <ResultCard data={data} />;
+            default: return <p>Результаты этапа {step} в обработке...</p>;
         }
     };
 
     return (
-        <div className="artifact-container">
-            <h2 className="section-title">Результат этапа</h2>
+        <div className="artifact-container" style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
+            <h2 style={{ marginBottom: '25px', fontSize: '24px' }}>Результат этапа</h2>
             {renderArtifact()}
         </div>
     );

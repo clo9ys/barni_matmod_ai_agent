@@ -1,72 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './styles.css';
 import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
 import ArtifactViewer from './components/ArtifactViewer';
 import TraceLog from './components/TraceLog';
 import Stepper from './components/Stepper';
-import Auth from './components/Auth'; // Импортируем компонент авторизации
+import Auth from './components/Auth';
 import { useAssistant } from './hooks/useAssistant';
 
-const STEPS = [
-  'Запрос',
-  'Определение',
-  'Дизайн',
-  'Структура',
-  'План',
-  'Скрипт',
-  'Сборка'
-];
+const STEPS = ['Запрос', 'Определение', 'Источники', 'Гипотезы', 'План', 'Скрипт', 'Сборка'];
 
 export default function App() {
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('access_token'));
 
-  // При первой загрузке проверяем, есть ли сохраненный токен
-  useEffect(() => {
-    const savedToken = localStorage.getItem('access_token');
-    if (savedToken) {
-      setToken(savedToken);
-    }
-  }, []);
+  const {
+    currentStep, viewStep, setViewStep,
+    logs, artifacts, isProcessing,
+    initialQuery, sendMessage, loadResearch, resetAssistant
+  } = useAssistant(token);
 
-  // Функция успешного входа
-  const handleLogin = (newToken) => {
-    localStorage.setItem('access_token', newToken);
-    setToken(newToken);
-  };
+  if (!token) return <Auth onLogin={(t) => { localStorage.setItem('access_token', t); setToken(t); }} />;
 
-  // Функция выхода
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    setToken(null);
-  };
-
-  // Передаем токен в хук!
-  const { currentStep, setCurrentStep, logs, artifactData, isProcessing, sendMessage } = useAssistant(token);
-
-  // Если токена нет, показываем только страницу авторизации
-  if (!token) {
-    return <Auth onLogin={handleLogin} />;
-  }
-
-  // Если токен есть, показываем основное приложение
   return (
       <div className="app-layout">
-        {/* Передаем функцию логаута и токен в сайдбар */}
-        <Sidebar onLogout={handleLogout} token={token} />
+        <Sidebar
+            token={token}
+            onLogout={() => { localStorage.removeItem('access_token'); setToken(null); }}
+            onHistoryClick={loadResearch}
+            onNewChat={resetAssistant}
+        />
 
         <div className="main-area">
           <header className="top-bar">
-            <Stepper steps={STEPS} current={currentStep} onSelect={setCurrentStep} />
+            <Stepper steps={STEPS} current={currentStep} selected={viewStep} onSelect={setViewStep} />
           </header>
 
           <div className="workspace">
             <section className="chat-panel">
-              <Chat onSend={sendMessage} disabled={isProcessing} />
+              <Chat onSend={sendMessage} disabled={isProcessing} query={initialQuery} />
             </section>
 
             <section className="artifact-panel">
-              <ArtifactViewer currentStep={currentStep} artifactData={artifactData} />
+              <ArtifactViewer
+                  step={viewStep}
+                  data={artifacts[viewStep]}
+                  query={initialQuery}
+              />
             </section>
           </div>
 
