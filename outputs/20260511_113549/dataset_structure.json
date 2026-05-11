@@ -1,0 +1,44 @@
+{
+  "grain": "country-year",
+  "dimensions": [
+    {
+      "name": "country",
+      "type": "string",
+      "description": "Название страны или территории"
+    },
+    {
+      "name": "country_code",
+      "type": "string",
+      "description": "Код страны по стандарту ISO3 или WB"
+    },
+    {
+      "name": "year",
+      "type": "integer",
+      "description": "Год наблюдения (2010–2022)"
+    },
+    {
+      "name": "region",
+      "type": "string",
+      "description": "Географический регион по классификации Всемирного банка"
+    },
+    {
+      "name": "income_group",
+      "type": "string",
+      "description": "Группа по уровню дохода (по классификации Всемирного банка)"
+    }
+  ],
+  "indicators": [
+    {
+      "name": "urban_population_share",
+      "type": "float",
+      "unit": "percent",
+      "description": "Доля городского населения в общей численности населения"
+    },
+    {
+      "name": "total_fertility_rate",
+      "type": "float",
+      "unit": "births_per_woman",
+      "description": "Общий коэффициент рождаемости"
+    }
+  ]
+}
