@@ -1,0 +1,15 @@
+{
+  "query_type": "simple",
+  "needs_clarification": false,
+  "indicators": [
+    "CPI"
+  ],
+  "geography": [
+    "RU"
+  ],
+  "time_period": {
+    "start": 2014,
+    "end": 2024
+  },
+  "units": []
+}

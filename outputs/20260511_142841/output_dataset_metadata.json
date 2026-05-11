@@ -1,0 +1,17 @@
+{
+  "query": "Динамика ВВП России на душу населения за 2010-2023 годы",
+  "sources": [
+    "wb_NY.GDP.MKTP.CD",
+    "wb_SP.POP.TOTL"
+  ],
+  "indicators": [
+    "gdp_per_capita_usd"
+  ],
+  "description": "Номинальный ВВП на душу населения в текущих долларах США, рассчитанный как ВВП в USD / население",
+  "rows": 14,
+  "columns": [
+    "year",
+    "gdp_per_capita_usd"
+  ],
+  "saved_at": "2026-05-11"
+}
