@@ -1,117 +1,207 @@
+import os
 import asyncio
 import json
 import uuid
-from typing import Dict
+from pathlib import Path
+from typing import Dict, Tuple
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlmodel import Session, select
 from sse_starlette.sse import EventSourceResponse
 from src.core.database import ResearchTable, User, get_session, engine
 from src.interface.app.auth import get_current_user
-from src.ml.model import complete_json
-from src.ml.prompts import build_extract_params_messages, build_research_design_messages
-from src.ml.rag import search_datasets
+
+# Импорты реального ML-пайплайна
+from src.ml.model import complete_json, is_llm_configured
+from src.ml.prompts import (
+    build_extract_params_messages,
+    build_research_design_messages,
+    build_assembly_plan_messages,
+)
+from src.ml.rag import (
+    FAISS_INDEX_PATH,
+    METADATA_PATH,
+    search_datasets,
+)
+from src.ml.reranker import rerank_datasets
+from src.tools.readers import read_fedstatru_coverage
+from src.tools.validator import validate_assembly_plan
+from src.ml.codegen import generate_analysis_code
+from src.core.pipeline import _build_english_query, _merge_candidates, NO_DATA_RERANK_THRESHOLD
+
 
 router = APIRouter(tags=["research"])
-event_queues: Dict[str, asyncio.Queue] = {}
+event_queues: Dict[str, Tuple[asyncio.Queue, asyncio.AbstractEventLoop]] = {}
 
-# ДОБАВЛЕН АРГУМЕНТ loop
 def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.AbstractEventLoop):
     def sync_push(data: dict):
         if task_id in event_queues:
-            # Используем переданный главный loop
-            asyncio.run_coroutine_threadsafe(event_queues[task_id].put(data), loop)
+            queue, main_loop = event_queues[task_id]
+            asyncio.run_coroutine_threadsafe(queue.put(data), main_loop)
 
     with Session(engine) as db:
         db_state = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
 
         try:
-            sync_push({"type": "log", "message": "🤖 Запуск агента. Анализирую запрос..."})
+            if not is_llm_configured():
+                raise RuntimeError("LLM не настроена. Укажите AI_API_KEY и AI_MODEL в .env")
 
+            archive_root = os.getenv("ARCHIVE_ROOT", "")
+
+            # ---------------------------------------------------------
+            # ШАГ 1: ИЗВЛЕЧЕНИЕ ПАРАМЕТРОВ
+            # ---------------------------------------------------------
+            sync_push({"type": "log", "message": "🤖 Извлекаю параметры исследования..."})
             params_messages = build_extract_params_messages(query)
-            params = complete_json(params_messages)
+            extracted_params = complete_json(params_messages)
 
             if db_state:
-                db_state.definition = params
-                db_state.trace.append("Шаг 2 выполнен: параметры извлечены")
+                db_state.definition = extracted_params
                 db.add(db_state)
                 db.commit()
 
+            # Обработка Stop-логики из пайплайна
+            if extracted_params.get("query_type") == "no_data":
+                sync_push({"type": "error", "message": "Запрос относится к теме, по которой отсутствуют экономические данные."})
+                return
+
+            if extracted_params.get("needs_clarification"):
+                q_list = extracted_params.get("clarifying_questions", [])
+                sync_push({"type": "error", "message": f"Уточните запрос: {', '.join(q_list)}"})
+                return
+
             sync_push({
-                "type": "step_update",
-                "step": 1,
+                "type": "step_update", "step": 1,
                 "artifact": {
-                    "geography": ", ".join(params.get("geography", [])),
-                    "timeframe": f"{params.get('time_period', {}).get('start', '...')}",
-                    "perspective": params.get("subject_area", "Экономика"),
-                    "questions": params.get("clarifying_questions", [])
+                    "geography": ", ".join(extracted_params.get("geography", [])),
+                    "timeframe": f"{extracted_params.get('time_period', {}).get('start', '...')}",
+                    "perspective": extracted_params.get("subject_area", "Экономика"),
+                    "questions": extracted_params.get("clarifying_questions", [])
                 }
             })
 
-            sync_push({"type": "log", "message": "📝 Формирую гипотезы и дизайн исследования..."})
-            design_messages = build_research_design_messages(query, params)
-            design = complete_json(design_messages)
+            # ---------------------------------------------------------
+            # ШАГ 2: ПОИСК (RAG) И РЕРАНКИНГ
+            # ---------------------------------------------------------
+            sync_push({"type": "log", "message": "🔍 Ищу источники в реестре НЦСЭД..."})
+            candidates_original = search_datasets(query, top_k=20, index_path=FAISS_INDEX_PATH, metadata_path=METADATA_PATH)
+
+            eng_query = _build_english_query(extracted_params)
+            candidates_english = []
+            if eng_query and eng_query.lower() not in query.lower():
+                candidates_english = search_datasets(eng_query, top_k=20, index_path=FAISS_INDEX_PATH, metadata_path=METADATA_PATH)
+
+            candidates = _merge_candidates(candidates_original, candidates_english)
+
+            sync_push({"type": "log", "message": "🧠 Анализирую релевантность датасетов..."})
+            top_datasets = rerank_datasets(query, candidates, top_k=5)
+
+            best_score = max((d.get("rerank_score", 0.0) for d in top_datasets), default=0.0)
+            if best_score < NO_DATA_RERANK_THRESHOLD:
+                sync_push({"type": "error", "message": f"Нет релевантных данных (score: {best_score:.2f}). Переформулируйте запрос."})
+                return
+
+            sync_push({
+                "type": "step_update", "step": 4, # Шаг источников в UI
+                "artifact": {
+                    "title": top_datasets[0].get('title'),
+                    "tags": top_datasets[0].get('tags', []),
+                    "description": top_datasets[0].get('description'),
+                    "url": top_datasets[0].get('source_url', "#")
+                }
+            })
+
+            # ---------------------------------------------------------
+            # ШАГ 3: ДИЗАЙН ИССЛЕДОВАНИЯ
+            # ---------------------------------------------------------
+            sync_push({"type": "log", "message": "📝 Формирую гипотезы и дизайн..."})
+            research_design = complete_json(build_research_design_messages(query, extracted_params, top_datasets))
 
             if db_state:
-                db_state.design = design
-                db_state.current_step = 3
+                db_state.design = research_design
                 db.add(db_state)
                 db.commit()
 
             sync_push({
-                "type": "step_update",
-                "step": 2,
+                "type": "step_update", "step": 2, # Шаг Гипотез в UI
                 "artifact": {
                     "hypotheses": [
-                        {
-                            "id": i,
-                            "title": h.get('hypothesis'),
-                            "metrics": h.get('required_indicators', []),
-                            "selected": True
-                        } for i, h in enumerate(design.get('hypotheses', []))
+                        {"id": i, "title": h.get('hypothesis'), "metrics": h.get('required_indicators', []), "selected": True}
+                        for i, h in enumerate(research_design.get('hypotheses', []))
                     ]
                 }
             })
 
-            sync_push({"type": "log", "message": "🔍 Ищу подходящие датасеты в реестре НЦСЭД..."})
-            search_query = f"{query} {params.get('subject_area', '')}"
-            found_datasets = search_datasets(search_query, top_k=3)
+            # ---------------------------------------------------------
+            # ШАГ 4: ПЛАН СБОРКИ И ВАЛИДАЦИЯ
+            # ---------------------------------------------------------
+            sync_push({"type": "log", "message": "⚙️ Составляю план сборки данных..."})
 
-            if found_datasets:
-                best_ds = found_datasets[0]
-                if db_state:
-                    db_state.assembly_plan = {"sources": found_datasets, "plan": "Интеграция через Python/Pandas"}
-                    db_state.current_step = 5
-                    db.add(db_state)
-                    db.commit()
+            if archive_root:
+                for ds in top_datasets:
+                    fp = ds.get("file_path")
+                    sid = str(ds.get("source_id") or "")
+                    is_wb = "wb" in sid.lower() or str(fp or "").startswith("wb/")
+                    if fp and not is_wb:
+                        full_path = Path(archive_root) / fp
+                        if full_path.exists():
+                            ds["available_coverage"] = read_fedstatru_coverage(full_path)
 
-                sync_push({
-                    "type": "step_update",
-                    "step": 4,
-                    "artifact": {
-                        "title": best_ds.get('title'),
-                        "tags": best_ds.get('tags', []),
-                        "description": best_ds.get('description'),
-                        "url": best_ds.get('source_url', "#")
-                    }
-                })
-            else:
-                sync_push({"type": "log", "message": "⚠️ Данные в реестре не найдены."})
+            assembly_plan = complete_json(build_assembly_plan_messages(query, extracted_params, top_datasets, research_design))
 
-            sync_push({"type": "log", "message": "⚙️ Генерация кода сборки..."})
             if db_state:
-                db_state.generated_script = "import pandas as pd\nprint('Сборка завершена')"
-                db_state.current_step = 7
+                db_state.assembly_plan = assembly_plan
                 db.add(db_state)
                 db.commit()
+
+            if archive_root:
+                sync_push({"type": "log", "message": "🛡️ Валидирую источники в локальном архиве..."})
+                validation_errors = validate_assembly_plan(assembly_plan, archive_root=archive_root)
+                if validation_errors:
+                    sync_push({"type": "error", "message": f"Ошибка валидации плана: {validation_errors}"})
+                    return
+
+            # ---------------------------------------------------------
+            # ШАГ 5: ГЕНЕРАЦИЯ КОДА (Codegen)
+            # ---------------------------------------------------------
+            sync_push({"type": "log", "message": "💻 Генерирую Python-скрипт..."})
+            code = generate_analysis_code(query, research_design, top_datasets, archive_root=archive_root, assembly_plan=assembly_plan)
+
+            if db_state:
+                db_state.generated_script = code
+                db_state.current_step = 6 # Дошли до скрипта
+                db.add(db_state)
+                db.commit()
+
+            sync_push({
+                "type": "step_update", "step": 5,
+                "artifact": {"code": code}
+            })
+
+            # ---------------------------------------------------------
+            # ШАГ 6: СБОРКА ДАННЫХ
+            # ---------------------------------------------------------
+            sync_push({"type": "log", "message": "✅ Завершаю сборку пайплайна..."})
+            # Позже сюда добавится выполнение кода через Docker
+            if db_state:
+                db_state.result_data = {"rows": 0, "status": "Скрипт готов к запуску в песочнице"}
+                db.add(db_state)
+                db.commit()
+
+            sync_push({
+                "type": "step_update", "step": 6,
+                "artifact": {"message": "Код успешно сгенерирован и прошел валидацию. Ожидание запуска.", "details": {}}
+            })
 
             sync_push({"type": "done"})
 
         except Exception as e:
             sync_push({"type": "error", "message": f"Ошибка агента: {str(e)}"})
             if db_state:
+                db_state.errors = db_state.errors or []
                 db_state.errors.append(str(e))
                 db.add(db_state)
                 db.commit()
+
 
 @router.post("/chat")
 async def init_chat(
@@ -126,7 +216,8 @@ async def init_chat(
         raise HTTPException(status_code=400, detail="Query is required")
 
     task_id = str(uuid.uuid4())
-    event_queues[task_id] = asyncio.Queue()
+    main_loop = asyncio.get_running_loop()
+    event_queues[task_id] = (asyncio.Queue(), main_loop)
 
     new_research = ResearchTable(
         session_id=task_id,
@@ -137,11 +228,9 @@ async def init_chat(
     db.add(new_research)
     db.commit()
 
-    # ПОЛУЧАЕМ ГЛАВНЫЙ LOOP И ПЕРЕДАЕМ В ФОН
-    loop = asyncio.get_running_loop()
-    background_tasks.add_task(run_agent_worker, task_id, query, user.id, loop)
-
+    background_tasks.add_task(run_agent_worker, task_id, query, user.id, main_loop)
     return {"task_id": task_id}
+
 
 @router.get("/stream/{task_id}")
 async def stream_task(request: Request, task_id: str):
@@ -150,7 +239,7 @@ async def stream_task(request: Request, task_id: str):
             yield {"data": json.dumps({"type": "error", "message": "Task not found"})}
             return
 
-        queue = event_queues[task_id]
+        queue, _ = event_queues[task_id]
         try:
             while True:
                 if await request.is_disconnected():
