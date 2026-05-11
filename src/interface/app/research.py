@@ -3,6 +3,7 @@ import asyncio
 import json
 import uuid
 from pathlib import Path
+from fastapi.responses import FileResponse
 from typing import Dict, Tuple
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlmodel import Session, select
@@ -13,7 +14,9 @@ from src.interface.app.auth import get_current_user
 # Импорты ML-пайплайна
 from src.ml.model import complete_json, is_llm_configured
 from src.ml.prompts import build_extract_params_messages, build_research_design_messages, build_assembly_plan_messages
-from src.ml.rag import FAISS_INDEX_PATH, METADATA_PATH, search_datasets
+# from src.ml.rag import FAISS_INDEX_PATH, METADATA_PATH, search_datasets
+# Вместо старого импорта RAG:
+from src.ml.rag import FULL_FAISS_INDEX_PATH, FULL_METADATA_PATH, search_datasets
 from src.ml.reranker import rerank_datasets
 from src.tools.readers import read_fedstatru_coverage
 from src.tools.validator import validate_assembly_plan
@@ -62,7 +65,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
 
             # ШАГ 2: ПОИСК (ИСТОЧНИКИ) - Теперь это Шаг 2
             sync_push({"type": "log", "message": "🔍 Поиск в реестре НЦСЭД..."})
-            candidates = search_datasets(query, top_k=20, index_path=FAISS_INDEX_PATH, metadata_path=METADATA_PATH)
+            candidates = search_datasets(query, top_k=20, index_path=FULL_FAISS_INDEX_PATH, metadata_path=FULL_METADATA_PATH)
             top_datasets = rerank_datasets(query, candidates, top_k=5)
 
             if not top_datasets or max((d.get("rerank_score", 0.0) for d in top_datasets), default=0.0) < NO_DATA_RERANK_THRESHOLD:
@@ -102,18 +105,29 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             sync_push({"type": "log", "message": "⚙️ Составление плана сборки..."})
             assembly_plan = complete_json(build_assembly_plan_messages(query, extracted_params, top_datasets, research_design))
 
+            # --- ФИКС: Защита от забывчивости LLM ---
+            # Принудительно восстанавливаем file_path из оригинальных датасетов
+            if isinstance(assembly_plan.get("sources"), list):
+                for plan_source in assembly_plan["sources"]:
+                    for ds in top_datasets:
+                        if plan_source.get("id") == ds.get("id") and "file_path" in ds:
+                            plan_source["file_path"] = ds.get("file_path")
+            # ----------------------------------------
+
             if db_state:
-                db_state.assembly_plan = assembly_plan
+                db_state.assembly_plan = {
+                    "plan": assembly_plan,
+                    "sources": top_datasets
+                }
                 db.add(db_state)
                 db.commit()
 
             if archive_root:
                 errors = validate_assembly_plan(assembly_plan, archive_root=archive_root)
                 if errors:
-                    sync_push({"type": "error", "message": f"Ошибка валидации: {errors}"})
+                    sync_push({"type": "error", "message": f"Ошибка валидации плана: {errors}"})
                     return
 
-            # Отправляем заглушку для шага 4 (чтобы UI знал, что план готов)
             sync_push({"type": "step_update", "step": 4, "artifact": {"plan": "Валидация пройдена"}})
 
             # ШАГ 5: CODEGEN
@@ -127,7 +141,54 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 db.commit()
 
             sync_push({"type": "step_update", "step": 5, "artifact": {"code": code}})
-            sync_push({"type": "step_update", "step": 6, "artifact": {"message": "Скрипт готов к выполнению"}})
+
+            # ШАГ 6: СБОРКА ДАННЫХ И ОТДАЧА ФАЙЛА
+            sync_push({"type": "log", "message": "⚙️ Выполняю скрипт в локальной песочнице..."})
+
+            output_dir = Path("data/outputs")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_file = output_dir / f"{task_id}.csv"
+            script_path = output_dir / f"script_{task_id}.py"
+
+            # Магия песочницы: дописываем к коду автосохранение результата
+            injected_code = f"""
+{code}
+
+# --- Автосохранение результата для БАРНИ ---
+import pandas as pd
+# Ищем все созданные pandas DataFrame и сохраняем самый большой (итоговый)
+dfs = [v for v in locals().values() if isinstance(v, pd.DataFrame)]
+if dfs:
+    best_df = max(dfs, key=lambda x: len(x))
+    best_df.to_csv(r'{str(output_file.absolute())}', index=False)
+    print(f"SAVED_ROWS: {{len(best_df)}}")
+"""
+            with open(script_path, "w", encoding="utf-8") as f:
+                f.write(injected_code)
+
+            import subprocess
+            process = subprocess.run(["python", str(script_path)], capture_output=True, text=True)
+
+            if process.returncode != 0:
+                sync_push({"type": "error", "message": f"Скрипт упал: {process.stderr}"})
+                return
+
+            rows_count = "Неизвестно"
+            for line in process.stdout.split("\n"):
+                if "SAVED_ROWS:" in line:
+                    rows_count = line.split(":")[1].strip()
+
+            result_data = {
+                "message": f"Сборка завершена! Собрано строк: {rows_count}",
+                "file_url": f"/api/v1/download/{task_id}.csv"
+            }
+
+            if db_state:
+                db_state.result_data = result_data
+                db.add(db_state)
+                db.commit()
+
+            sync_push({"type": "step_update", "step": 6, "artifact": result_data})
             sync_push({"type": "done"})
 
         except Exception as e:
@@ -199,3 +260,10 @@ async def get_research_detail(session_id: str, user: User = Depends(get_current_
     res = db.exec(select(ResearchTable).where(ResearchTable.session_id == session_id, ResearchTable.user_id == user.id)).first()
     if not res: raise HTTPException(status_code=404)
     return res
+
+@router.get("/download/{filename}")
+async def download_file(filename: str):
+    file_path = Path(f"data/outputs/{filename}")
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Файл датасета не найден")
+    return FileResponse(path=file_path, filename=filename, media_type='text/csv')
