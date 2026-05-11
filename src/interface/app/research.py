@@ -109,10 +109,10 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             sync_push({"type": "log", "message": "⚙️ Составление плана сборки..."})
             assembly_plan = complete_json(build_assembly_plan_messages(query, extracted_params, top_datasets, research_design))
 
-            if isinstance(assembly_plan.get("sources"), list):
-                for plan_source in assembly_plan["sources"]:
+            if isinstance(assembly_plan.get("primary_sources"), list):
+                for plan_source in assembly_plan["primary_sources"]:
                     for ds in top_datasets:
-                        if plan_source.get("id") == ds.get("id") and "file_path" in ds:
+                        if plan_source.get("dataset_id") == ds.get("id") and "file_path" in ds:
                             plan_source["file_path"] = ds.get("file_path")
 
             if db_state:

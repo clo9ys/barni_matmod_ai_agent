@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from sqlalchemy import Column, JSON
+from sqlalchemy import Column, JSON, text
 from sqlmodel import Field, SQLModel, create_engine, Session, Relationship, select
 from pathlib import Path
 
@@ -66,6 +66,13 @@ def init_db():
     """создание всех таблиц при старте приложения"""
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     SQLModel.metadata.create_all(engine)
+    # Миграция: добавляем колонку result_data если её ещё нет (SQLite не поддерживает IF NOT EXISTS)
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE researchtable ADD COLUMN result_data JSON"))
+            conn.commit()
+        except Exception:
+            pass  # колонка уже существует
 
 
 def get_session():

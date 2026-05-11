@@ -28,11 +28,14 @@ export function useAssistant(token) {
 
             setInitialQuery(data.query);
             setCurrentStep(data.current_step);
-            setViewStep(1); // При загрузке показываем первый шаг
+            setViewStep(data.current_step || 1);
 
             // МАППИНГ: Превращаем сырые данные из БД в формат для карточек
+            // Порядок шагов совпадает с тем, что отправляет research.py:
+            // 1 - параметры запроса, 2 - источник, 3 - гипотезы, 4 - валидация плана, 5 - код, 6 - результат
             const mappedArtifacts = {};
 
+            // Шаг 1: параметры запроса
             if (data.definition) {
                 mappedArtifacts[1] = {
                     geography: data.definition.geography?.join(', ') || '',
@@ -42,8 +45,20 @@ export function useAssistant(token) {
                 };
             }
 
-            if (data.design && data.design.hypotheses) {
+            // Шаг 2: лучший найденный источник
+            if (data.assembly_plan?.sources?.length > 0) {
+                const bestDs = data.assembly_plan.sources[0];
                 mappedArtifacts[2] = {
+                    title: bestDs.title,
+                    tags: bestDs.tags || [],
+                    description: bestDs.description,
+                    url: bestDs.source_url || '#'
+                };
+            }
+
+            // Шаг 3: гипотезы
+            if (data.design?.hypotheses) {
+                mappedArtifacts[3] = {
                     hypotheses: data.design.hypotheses.map((h, i) => ({
                         id: i,
                         title: h.hypothesis,
@@ -53,28 +68,19 @@ export function useAssistant(token) {
                 };
             }
 
-            // Шаг 3: Структура (пока резерв)
-            if (data.structure) mappedArtifacts[3] = data.structure;
-
-            // Шаг 4: Источники (вытаскиваем первый датасет из плана)
-            if (data.assembly_plan && data.assembly_plan.sources && data.assembly_plan.sources.length > 0) {
-                const bestDs = data.assembly_plan.sources[0];
-                mappedArtifacts[4] = {
-                    title: bestDs.title,
-                    tags: bestDs.tags || [],
-                    description: bestDs.description,
-                    url: bestDs.source_url || '#'
-                };
+            // Шаг 4: план сборки прошёл валидацию (карточка не требует данных)
+            if (data.assembly_plan) {
+                mappedArtifacts[4] = { plan: 'Валидация пройдена' };
             }
 
-            // Шаг 5: Сгенерированный код
+            // Шаг 5: сгенерированный скрипт
             if (data.generated_script) {
                 mappedArtifacts[5] = { code: data.generated_script };
             }
 
-            // Шаг 6: Финальная сборка
+            // Шаг 6: результат выполнения
             if (data.result_data) {
-                mappedArtifacts[6] = { message: "Данные успешно собраны", details: data.result_data };
+                mappedArtifacts[6] = data.result_data;
             }
 
             setArtifacts(mappedArtifacts);
