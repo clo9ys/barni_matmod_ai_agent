@@ -22,25 +22,43 @@ export default function Sidebar({ token, onLogout, onHistoryClick, onNewChat }) 
     }, [token]);
 
     return (
-        <aside className="sidebar">
-            <div className="sidebar-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <h2 className="sidebar-title">БАРНИ</h2>
-                <button onClick={onLogout} style={{background: 'transparent', color: '#ff4d4f', border: 'none', cursor: 'pointer'}}>Выйти</button>
+        <aside className="w-64 bg-soft-sidebar border-r border-soft-border flex flex-col shrink-0">
+            <div className="p-6 border-b border-soft-border flex justify-between items-center">
+                <h2 className="text-lg font-bold tracking-tight text-soft-text">БАРНИ</h2>
+                <button 
+                    onClick={onLogout} 
+                    className="text-xs font-medium text-red-500 hover:text-red-600 transition-colors"
+                >
+                    Выйти
+                </button>
             </div>
-            <div className="sidebar-actions">
-                <button onClick={onNewChat} className="btn-primary sidebar-btn">+ Новый запрос</button>
+            
+            <div className="p-4">
+                <button 
+                    onClick={onNewChat} 
+                    className="w-full btn-primary shadow-sm"
+                >
+                    + Новый запрос
+                </button>
             </div>
-            <div className="sidebar-history">
-                <p style={{marginBottom: "10px", fontSize: "0.9rem", color: "#888"}}>История исследований</p>
-                <ul className="history-list">
+            
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
+                <p className="px-2 mb-3 text-[10px] uppercase font-bold tracking-wider text-soft-muted">
+                    История исследований
+                </p>
+                <ul className="space-y-1">
                     {history.map((item) => (
                         <li
                             key={item.session_id}
-                            className="history-item"
+                            className="p-3 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer transition-all border border-transparent hover:border-soft-border group"
                             onClick={() => onHistoryClick(item.session_id)}
                         >
-                            <span className="history-status">[{item.current_step}/7]</span>
-                            <span className="history-query">{item.query}</span>
+                            <span className="block text-[10px] font-bold text-soft-accent mb-1">
+                                ШАГ {item.current_step}/7
+                            </span>
+                            <span className="block text-sm text-soft-text truncate group-hover:text-soft-accent transition-colors">
+                                {item.query}
+                            </span>
                         </li>
                     ))}
                 </ul>

@@ -42,8 +42,19 @@ export function useAssistant(token) {
                 };
             }
 
-            if (data.design && data.design.hypotheses) {
+            // Шаг 2: Источники (вытаскиваем первый датасет из плана или используем данные о источниках)
+            if (data.assembly_plan && data.assembly_plan.sources && data.assembly_plan.sources.length > 0) {
+                const bestDs = data.assembly_plan.sources[0];
                 mappedArtifacts[2] = {
+                    title: bestDs.title,
+                    tags: bestDs.tags || [],
+                    description: bestDs.description,
+                    url: bestDs.source_url || '#'
+                };
+            }
+
+            if (data.design && data.design.hypotheses) {
+                mappedArtifacts[3] = {
                     hypotheses: data.design.hypotheses.map((h, i) => ({
                         id: i,
                         title: h.hypothesis,
@@ -53,18 +64,9 @@ export function useAssistant(token) {
                 };
             }
 
-            // Шаг 3: Структура (пока резерв)
-            if (data.structure) mappedArtifacts[3] = data.structure;
-
-            // Шаг 4: Источники (вытаскиваем первый датасет из плана)
-            if (data.assembly_plan && data.assembly_plan.sources && data.assembly_plan.sources.length > 0) {
-                const bestDs = data.assembly_plan.sources[0];
-                mappedArtifacts[4] = {
-                    title: bestDs.title,
-                    tags: bestDs.tags || [],
-                    description: bestDs.description,
-                    url: bestDs.source_url || '#'
-                };
+            // Шаг 4: План (пока просто пометка о наличии)
+            if (data.assembly_plan) {
+                mappedArtifacts[4] = data.assembly_plan;
             }
 
             // Шаг 5: Сгенерированный код
@@ -74,7 +76,7 @@ export function useAssistant(token) {
 
             // Шаг 6: Финальная сборка
             if (data.result_data) {
-                mappedArtifacts[6] = { message: "Данные успешно собраны", details: data.result_data };
+                mappedArtifacts[6] = { message: "Данные успешно собраны", details: data.result_data, file_url: data.result_file };
             }
 
             setArtifacts(mappedArtifacts);

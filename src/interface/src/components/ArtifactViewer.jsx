@@ -7,32 +7,48 @@ import ResultCard from './cards/ResultCard';
 
 export default function ArtifactViewer({ step, data, query }) {
     const renderArtifact = () => {
-        // Шаг 0: Запрос
         if (step === 0) {
             return (
-                <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
-                    <h3 style={{ marginBottom: '10px', color: '#deff9a' }}>Ваш запрос:</h3>
-                    <p style={{ fontSize: '18px', lineHeight: '1.5' }}>{query || "Ожидание ввода..."}</p>
+                <div className="bg-white border border-soft-border rounded-2xl p-8 shadow-sm">
+                    <h3 className="text-sm font-bold text-soft-accent uppercase tracking-wider mb-4">Ваш запрос:</h3>
+                    <p className="text-xl font-medium leading-relaxed text-soft-text italic">
+                        "{query || "Ожидание ввода..."}"
+                    </p>
                 </div>
             );
         }
 
-        if (!data) return <p className="dimmed" style={{ marginTop: '20px' }}>Данные для этого этапа еще не получены...</p>;
+        if (!data) return (
+            <div className="flex flex-col items-center justify-center py-20 text-soft-muted">
+                <div className="text-4xl mb-4 opacity-20">📂</div>
+                <p className="text-sm font-medium">Данные для этого этапа еще не получены...</p>
+            </div>
+        );
 
         switch (step) {
             case 1: return <ResearchDefinitionCard data={data} />;
             case 2: return <SourceCard source={data} />;
             case 3: return <HypothesisCard hypotheses={data.hypotheses} />;
-            case 4: return <p className="dimmed">План сборки данных успешно прошел валидацию.</p>;
+            case 4: return (
+                <div className="card border-green-100 bg-green-50/30 flex items-center gap-4">
+                    <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center shrink-0">✓</div>
+                    <p className="text-sm font-medium text-green-800">План сборки данных успешно прошел автоматическую валидацию.</p>
+                </div>
+            );
             case 5: return <ScriptCard data={data} />;
             case 6: return <ResultCard data={data} />;
-            default: return <p>Результаты этапа {step} в обработке...</p>;
+            default: return <p className="text-soft-muted text-center py-10">Результаты этапа {step} в обработке...</p>;
         }
     };
 
     return (
-        <div className="artifact-container" style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
-            <h2 style={{ marginBottom: '25px', fontSize: '24px' }}>Результат этапа</h2>
+        <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black tracking-tight text-soft-text">Результат этапа</h2>
+                <span className="px-3 py-1 bg-soft-sidebar border border-soft-border rounded-full text-[10px] font-bold text-soft-muted uppercase">
+                    Этап {step}
+                </span>
+            </div>
             {renderArtifact()}
         </div>
     );

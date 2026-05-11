@@ -1,32 +1,29 @@
 import React from 'react';
 
 export default function ResultCard({ data }) {
-    if (!data) return <p className="dimmed">Ожидание финальной сборки датасета...</p>;
+    if (!data) return (
+        <div className="card border-dashed border-2 flex items-center justify-center py-12">
+            <p className="text-soft-muted text-sm italic">Ожидание финальной сборки датасета...</p>
+        </div>
+    );
 
     return (
-        <div className="card" style={{ borderColor: '#deff9a' }}>
-            <div className="card-header" style={{ borderBottom: '1px solid rgba(222, 255, 154, 0.2)' }}>
-                <h4 style={{ color: '#deff9a' }}>Финальный датасет готов</h4>
+        <div className="card border-soft-accent/30 bg-soft-accent/2 overflow-hidden">
+            <div className="p-6 border-b border-soft-accent/10 flex items-center justify-between bg-soft-accent/3">
+                <h4 className="text-lg font-bold text-soft-accent">Финальный датасет готов</h4>
+                <span className="px-2 py-1 bg-soft-accent text-white text-[10px] font-black rounded uppercase">Success</span>
             </div>
-            <div className="card-body">
-                <p>{data.message}</p>
+            <div className="p-8">
+                <p className="text-soft-text mb-8 leading-relaxed">{data.message}</p>
 
                 {data.file_url && (
                     <a
                         href={`http://localhost:8000${data.file_url}`}
                         download
-                        style={{
-                            display: 'inline-block',
-                            marginTop: '15px',
-                            padding: '10px 20px',
-                            background: '#deff9a',
-                            color: '#121212',
-                            textDecoration: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 'bold'
-                        }}
+                        className="inline-flex items-center gap-3 px-8 py-4 bg-soft-accent text-white rounded-xl font-bold shadow-lg shadow-soft-accent/20 hover:bg-sky-600 hover:-translate-y-0.5 transition-all"
                     >
-                        📥 Скачать CSV
+                        <span className="text-xl">📥</span>
+                        Скачать CSV
                     </a>
                 )}
             </div>
