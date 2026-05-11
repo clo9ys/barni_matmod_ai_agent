@@ -32,17 +32,20 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
     """
     # Создаем свою сессию БД для фонового потока
     with Session(engine) as db:
+        db_state = None
         try:
             # 1. Инициализация и Шаг 2 (Определение)
             await push_event(task_id, {"type": "log", "message": "🤖 Запуск агента. Анализирую запрос..."})
 
             params_messages = build_extract_params_messages(query)
-            params = complete_json(params_messages)
+            params = await asyncio.to_thread(complete_json, params_messages)
 
             # Сохраняем в БД
             db_state = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
+            if db_state is None:
+                raise RuntimeError(f"ResearchTable record not found for task_id={task_id}")
             db_state.definition = params
-            db_state.trace.append("Шаг 2 выполнен: параметры извлечены")
+            db_state.trace = db_state.trace + ["Шаг 2 выполнен: параметры извлечены"]
             db.add(db_state)
             db.commit()
 
@@ -61,8 +64,11 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
             # 2. Шаг 3 (Дизайн исследования / Гипотезы)
             await push_event(task_id, {"type": "log", "message": "📝 Формирую гипотезы и дизайн исследования..."})
 
-            design_messages = build_research_design_messages(query, params)
-            design = complete_json(design_messages)
+            search_query = f"{query} {params.get('subject_area', '')}"
+            found_datasets = await asyncio.to_thread(search_datasets, search_query, 3)
+
+            design_messages = build_research_design_messages(query, params, found_datasets)
+            design = await asyncio.to_thread(complete_json, design_messages)
 
             db_state.design = design
             db_state.current_step = 3
@@ -88,10 +94,6 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
             # 3. Шаг 5 (Поиск в реестре через RAG/FAISS)
             await push_event(task_id, {"type": "log", "message": "🔍 Ищу подходящие датасеты в реестре НЦСЭД..."})
 
-            # Поиск в FAISS (из твоего rag.py)
-            search_query = f"{query} {params.get('subject_area', '')}"
-            found_datasets = search_datasets(search_query, top_k=3)
-
             if found_datasets:
                 best_ds = found_datasets[0]
                 db_state.assembly_plan = {"sources": found_datasets, "plan": "Интеграция через Python/Pandas"}
@@ -102,7 +104,7 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
                 # Пушим на фронт (SourceCard)
                 await push_event(task_id, {
                     "type": "step_update",
-                    "step": 4,  # У фронта это 4-й тип карточки
+                    "step": 4,
                     "artifact": {
                         "title": best_ds.get('title'),
                         "tags": best_ds.get('tags', []),
@@ -115,7 +117,6 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
 
             # 4. Шаг 6 и 7 (Скрипт и Сборка)
             await push_event(task_id, {"type": "log", "message": "⚙️ Генерация кода сборки..."})
-            # Тут можно добавить вызов промпта для кода, пока имитируем
             db_state.generated_script = "import pandas as pd\nprint('Сборка завершена')"
             db_state.current_step = 7
             db.add(db_state)
@@ -126,8 +127,8 @@ async def run_agent_worker(task_id: str, query: str, user_id: int):
 
         except Exception as e:
             await push_event(task_id, {"type": "error", "message": f"Ошибка агента: {str(e)}"})
-            if db_state:
-                db_state.errors.append(str(e))
+            if db_state is not None:
+                db_state.errors = db_state.errors + [str(e)]
                 db.add(db_state)
                 db.commit()
 

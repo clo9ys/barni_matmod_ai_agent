@@ -26,6 +26,10 @@ FULL_METADATA_PATH = FULL_INDEX_DIR / "metadata.json"
 
 DEFAULT_MODEL_NAME = "intfloat/multilingual-e5-small"
 
+# Module-level caches — populated on first call, reused for all subsequent calls
+_model_cache: dict[str, SentenceTransformer] = {}
+_index_cache: dict[str, tuple[faiss.Index, list[dict[str, Any]]]] = {}
+
 
 def load_registry(registry_path: Path = REGISTRY_PATH) -> list[dict[str, Any]]:
     if not registry_path.exists():
@@ -69,7 +73,9 @@ def dataset_to_text(dataset: dict[str, Any]) -> str:
 
 
 def load_embedding_model(model_name: str = DEFAULT_MODEL_NAME) -> SentenceTransformer:
-    return SentenceTransformer(model_name)
+    if model_name not in _model_cache:
+        _model_cache[model_name] = SentenceTransformer(model_name)
+    return _model_cache[model_name]
 
 
 def embed_texts(
@@ -147,15 +153,15 @@ def load_index(
     index_path: Path = FAISS_INDEX_PATH,
     metadata_path: Path = METADATA_PATH,
 ) -> tuple[faiss.Index, list[dict[str, Any]]]:
-    if not index_path.exists() or not metadata_path.exists():
-        raise FileNotFoundError("index files not found. run: python -m src.ml.rag build")
-
-    index = faiss.read_index(str(index_path))
-
-    with metadata_path.open("r", encoding="utf-8") as file:
-        metadata = json.load(file)
-
-    return index, metadata
+    cache_key = str(index_path)
+    if cache_key not in _index_cache:
+        if not index_path.exists() or not metadata_path.exists():
+            raise FileNotFoundError("index files not found. run: python -m src.ml.rag build")
+        index = faiss.read_index(str(index_path))
+        with metadata_path.open("r", encoding="utf-8") as file:
+            metadata = json.load(file)
+        _index_cache[cache_key] = (index, metadata)
+    return _index_cache[cache_key]
 
 
 def search_datasets(

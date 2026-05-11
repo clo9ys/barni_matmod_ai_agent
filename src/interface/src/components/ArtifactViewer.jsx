@@ -1,3 +1,8 @@
+import React from 'react';
+import ResearchDefinitionCard from './cards/ResearchDefinitionCard';
+import HypothesisCard from './cards/HypothesisCard';
+import SourceCard from './cards/SourceCard';
+
 export default function ArtifactViewer({ currentStep, artifactData }) {
     const renderArtifact = () => {
         if (!artifactData && currentStep !== 0) return <p>Ожидание данных этапа...</p>;

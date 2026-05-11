@@ -72,5 +72,5 @@ export function useAssistant(token) {
         }
     }, [token]);
 
-    return { currentStep, logs, artifactData, isProcessing, sendMessage };
+    return { currentStep, setCurrentStep, logs, artifactData, isProcessing, sendMessage };
 }
