@@ -47,8 +47,9 @@ const Sidebar = forwardRef(({ token, currentSessionId, onLogout, onHistoryClick,
 
     return (
         <aside className="w-64 bg-soft-sidebar border-r border-soft-border flex flex-col shrink-0">
-            <div className="p-6 border-b border-soft-border">
-                <h2 className="text-lg font-bold tracking-tight text-soft-text">БАРНИ</h2>
+            <div className="p-6 border-b border-soft-border flex items-center gap-3">
+                <span className="text-2xl">🤖</span>
+                <h2 className="text-lg font-black tracking-tighter text-soft-accent">БАРНИ</h2>
             </div>
             
             <div className="p-4">
