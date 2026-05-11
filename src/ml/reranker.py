@@ -2,8 +2,20 @@ from __future__ import annotations
 
 from typing import Any
 
-from src.ml.model import complete_json
-from src.ml.prompts import build_rerank_messages
+from sentence_transformers import CrossEncoder
+
+from src.ml.rag import dataset_to_text
+
+
+DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
+
+_reranker_cache: dict[str, CrossEncoder] = {}
+
+
+def _load_reranker(model_name: str = DEFAULT_RERANKER_MODEL) -> CrossEncoder:
+    if model_name not in _reranker_cache:
+        _reranker_cache[model_name] = CrossEncoder(model_name)
+    return _reranker_cache[model_name]
 
 
 def rerank_datasets(
@@ -11,26 +23,26 @@ def rerank_datasets(
     candidates: list[dict[str, Any]],
     *,
     top_k: int = 5,
+    model_name: str = DEFAULT_RERANKER_MODEL,
 ) -> list[dict[str, Any]]:
-    """Rerank FAISS candidates using YandexGPT as a pointwise relevance judge.
+    """Rerank FAISS candidates with a cross-encoder model (deterministic, local).
 
-    Each candidate is scored independently (0.0–1.0). Falls back to the
-    original FAISS score if the LLM call fails.
+    Scores are sigmoid-normalised to [0, 1] by sentence_transformers.
     """
     if not candidates:
         return []
 
+    model = _load_reranker(model_name)
+
+    texts = [dataset_to_text(c) for c in candidates]
+    pairs = [(query, text) for text in texts]
+    scores = model.predict(pairs)
+
     scored: list[dict[str, Any]] = []
-    for candidate in candidates:
+    for candidate, score in zip(candidates, scores):
         item = dict(candidate)
-        try:
-            messages = build_rerank_messages(query, candidate)
-            result = complete_json(messages, temperature=0.0, max_tokens=200)
-            item["rerank_score"] = float(result.get("score", 0.0))
-            item["rerank_reason"] = result.get("reason", "")
-        except Exception:
-            item["rerank_score"] = float(candidate.get("score", 0.0))
-            item["rerank_reason"] = ""
+        item["rerank_score"] = float(score)
+        item["rerank_reason"] = ""
         scored.append(item)
 
     scored.sort(key=lambda x: x["rerank_score"], reverse=True)

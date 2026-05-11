@@ -21,10 +21,19 @@ from src.ml.rag import (
 from src.ml.reranker import rerank_datasets
 from src.tools.readers import read_fedstatru_coverage
 from src.tools.validator import validate_assembly_plan
+from src.core.artifacts import make_session_id, save_artifacts, _save_json
+from src.core.executor import run_script
+from src.tools.output_validator import output_validation_summary
 
 
 def _build_english_query(extracted_params: dict[str, Any]) -> str:
-    """Build an English search query from structured extracted params."""
+    """Build an English search query from structured extracted params.
+
+    Prefers the LLM-generated english_query field; falls back to concatenating
+    raw indicators and geography (which may still be in Russian).
+    """
+    if extracted_params.get("english_query"):
+        return str(extracted_params["english_query"])
     parts: list[str] = []
     parts.extend(extracted_params.get("indicators") or [])
     parts.extend(extracted_params.get("geography") or [])
@@ -51,7 +60,7 @@ def _merge_candidates(
 
 # Minimum rerank score for any dataset to be considered relevant.
 # If the best candidate is below this threshold, we treat it as no_data.
-NO_DATA_RERANK_THRESHOLD = 0.3
+NO_DATA_RERANK_THRESHOLD = 0.05  # cross-encoder sigmoid scores are low by nature; FAISS is the primary quality gate
 
 
 def run(
@@ -60,7 +69,9 @@ def run(
     top_k_retrieval: int = 20,
     top_k_rerank: int = 5,
     generate_code: bool = True,
+    execute_code: bool = False,
     use_full_registry: bool = False,
+    save_outputs: bool = True,
 ) -> dict[str, Any]:
     """Full pipeline: query → params → retrieval → rerank → design → code.
 
@@ -81,7 +92,9 @@ def run(
     if not is_llm_configured():
         raise RuntimeError("LLM not configured. Set AI_API_KEY and AI_MODEL in .env")
 
+    session_id = make_session_id()
     archive_root = os.getenv("ARCHIVE_ROOT", "")
+    outputs_root = os.getenv("OUTPUTS_ROOT", "outputs")
 
     index_path: Path
     metadata_path: Path
@@ -145,6 +158,7 @@ def run(
 
     # Step 3: Rerank with LLM — narrow down to top_k_rerank
     top_datasets = rerank_datasets(user_query, candidates, top_k=top_k_rerank)
+    base_result["retrieved_datasets"] = candidates
 
     # Stop 3: no dataset scored above the relevance threshold
     best_score = max((d.get("rerank_score", 0.0) for d in top_datasets), default=0.0)
@@ -204,12 +218,43 @@ def run(
 
     # Step 6: Generate Python analysis code
     if generate_code:
+        script_output_dir = str(Path(outputs_root) / session_id)
         result["code"] = generate_analysis_code(
             user_query,
             research_design,
             top_datasets,
             archive_root=archive_root,
             assembly_plan=assembly_plan,
+            output_dir=script_output_dir,
         )
+
+    result["session_id"] = session_id
+
+    if save_outputs:
+        session_dir = save_artifacts(result, session_id, outputs_root)
+        result["session_dir"] = str(session_dir)
+
+        # Step 7: Execute the generated script
+        if execute_code and result.get("code"):
+            execution = run_script(session_dir)
+            result["execution"] = {
+                "success": execution.success,
+                "returncode": execution.returncode,
+                "stdout": execution.stdout,
+                "stderr": execution.stderr,
+                "errors": execution.errors,
+                "output_csv": str(execution.output_csv) if execution.output_csv else None,
+                "output_meta": str(execution.output_meta) if execution.output_meta else None,
+            }
+
+            # Step 7.5: Validate the output dataset
+            output_check = output_validation_summary(result)
+            result["execution"]["output_valid"] = output_check["valid"]
+            result["execution"]["output_validation_errors"] = output_check["errors"]
+
+            _save_json(
+                session_dir / "output_validation.json",
+                output_check,
+            )
 
     return result

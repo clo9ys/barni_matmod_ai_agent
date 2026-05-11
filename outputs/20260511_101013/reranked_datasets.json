@@ -1,0 +1,8 @@
+[
+  {
+    "id": "ds1",
+    "title": "Dataset 1",
+    "rerank_score": 0.1,
+    "rerank_reason": "not relevant"
+  }
+]

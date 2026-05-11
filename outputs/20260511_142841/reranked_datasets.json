@@ -1,0 +1,273 @@
+[
+  {
+    "id": "fedstatru_40579",
+    "title": "ВВП России на душу населения по паритету покупательной способности",
+    "description": "ВВП России на душу населения по паритету покупательной способности",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/40579",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "ВВП России на душу населения по паритету покупательной способности",
+        "code": "40579",
+        "unit": "* доллар США"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "40579"
+    ],
+    "text_for_embedding": "ВВП России на душу населения по паритету покупательной способности\nВВП России на душу населения по паритету покупательной способности\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: ВВП России на душу населения по паритету покупательной способности 40579 * доллар США\ndimensions: \ntags: росстат, россия, fedstat, 40579",
+    "file_path": "fedstatru/data/parquet/40579.parquet",
+    "indicator_code": "40579",
+    "source_id": "fedstatru",
+    "unit": "* доллар США",
+    "score": 0.8585699200630188,
+    "rerank_score": 0.14561519026756287,
+    "rerank_reason": "",
+    "available_coverage": {
+      "99.43.4 доллар США": [
+        2023
+      ]
+    }
+  },
+  {
+    "id": "fedstatru_63097",
+    "title": "Доля регионов, обеспечивших не ниже среднероссийских темпы повышения суммарного коэффициента рождаемости, из числа субъектов Российской Федерации, в которых по итогам 2023 года значение такого коэффициента было ниже среднероссийского",
+    "description": "Доля регионов, обеспечивших не ниже среднероссийских темпы повышения суммарного коэффициента рождаемости, из числа субъектов Российской Федерации, в которых по итогам 2023 года значение такого коэффициента было ниже среднероссийского",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/63097",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Доля регионов, обеспечивших не ниже среднероссийских темпы повышения суммарного коэффициента рождаемости, из числа субъектов Российской Федерации, в которых по итогам 2023 года значение такого коэффициента было ниже среднероссийского",
+        "code": "63097",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "63097"
+    ],
+    "text_for_embedding": "Доля регионов, обеспечивших не ниже среднероссийских темпы повышения суммарного коэффициента рождаемости, из числа субъектов Российской Федерации, в которых по итогам 2023 года значение такого коэффициента было ниже среднероссийского\nДоля регионов, обеспечивших не ниже среднероссийских темпы повышения суммарного коэффициента рождаемости, из числа субъектов Российской Федерации, в которых по итогам 2023 года значение такого коэффициента было ниже среднероссийского\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Доля регионов, обеспечивших не ниже среднероссийских темпы повышения суммарного коэффициента рождаемости, из числа субъектов Российской Федерации, в которых по итогам 2023 года значение такого коэффициента было ниже среднероссийского 63097 * процент\ndimensions: \ntags: росстат, россия, fedstat, 63097",
+    "file_path": "fedstatru/data/parquet/63097.parquet",
+    "indicator_code": "63097",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8583250045776367,
+    "rerank_score": 0.1375596821308136,
+    "rerank_reason": "",
+    "available_coverage": {
+      "115 январь": [
+        2025,
+        2026
+      ],
+      "114 февраль": [
+        2025
+      ],
+      "68 март": [
+        2025
+      ],
+      "61 апрель": [
+        2025
+      ],
+      "67 май": [
+        2025
+      ],
+      "66 июнь": [
+        2025
+      ],
+      "65 июль": [
+        2025
+      ],
+      "60 август": [
+        2025
+      ],
+      "108 сентябрь": [
+        2025
+      ],
+      "105 октябрь": [
+        2025
+      ],
+      "104 ноябрь": [
+        2025
+      ],
+      "62 декабрь": [
+        2025
+      ]
+    }
+  },
+  {
+    "id": "fedstatru_62709",
+    "title": "Рост производительности труда в экономике Российской Федерации по отношению к 2023 году",
+    "description": "Рост производительности труда в экономике Российской Федерации по отношению к 2023 году",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/62709",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Рост производительности труда в экономике Российской Федерации по отношению к 2023 году",
+        "code": "62709",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "62709"
+    ],
+    "text_for_embedding": "Рост производительности труда в экономике Российской Федерации по отношению к 2023 году\nРост производительности труда в экономике Российской Федерации по отношению к 2023 году\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Рост производительности труда в экономике Российской Федерации по отношению к 2023 году 62709 * процент\ndimensions: \ntags: росстат, россия, fedstat, 62709",
+    "file_path": "fedstatru/data/parquet/62709.parquet",
+    "indicator_code": "62709",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8603798151016235,
+    "rerank_score": 0.1139674037694931,
+    "rerank_reason": "",
+    "available_coverage": {
+      "744 процент": [
+        2025
+      ]
+    }
+  },
+  {
+    "id": "fedstatru_40570",
+    "title": "Индекс физического объема ВВП на душу населения (США =100)",
+    "description": "Индекс физического объема ВВП на душу населения (США =100)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/40570",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс физического объема ВВП на душу населения (США =100)",
+        "code": "40570",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "40570"
+    ],
+    "text_for_embedding": "Индекс физического объема ВВП на душу населения (США =100)\nИндекс физического объема ВВП на душу населения (США =100)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс физического объема ВВП на душу населения (США =100) 40570 * процент\ndimensions: \ntags: росстат, россия, fedstat, 40570",
+    "file_path": "fedstatru/data/parquet/40570.parquet",
+    "indicator_code": "40570",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8504284024238586,
+    "rerank_score": 0.07920075953006744,
+    "rerank_reason": "",
+    "available_coverage": {
+      "744 процент": [
+        1996,
+        2005,
+        2008,
+        2011,
+        2014,
+        2017,
+        2021
+      ]
+    }
+  },
+  {
+    "id": "fedstatru_40565",
+    "title": "Реальный объем использования ВВП на душу населения (по паритету покупательной способности)",
+    "description": "Реальный объем использования ВВП на душу населения (по паритету покупательной способности)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/40565",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Реальный объем использования ВВП на душу населения (по паритету покупательной способности)",
+        "code": "40565",
+        "unit": "* доллар США"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "40565"
+    ],
+    "text_for_embedding": "Реальный объем использования ВВП на душу населения (по паритету покупательной способности)\nРеальный объем использования ВВП на душу населения (по паритету покупательной способности)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Реальный объем использования ВВП на душу населения (по паритету покупательной способности) 40565 * доллар США\ndimensions: \ntags: росстат, россия, fedstat, 40565",
+    "file_path": "fedstatru/data/parquet/40565.parquet",
+    "indicator_code": "40565",
+    "source_id": "fedstatru",
+    "unit": "* доллар США",
+    "score": 0.8558163046836853,
+    "rerank_score": 0.05050785839557648,
+    "rerank_reason": "",
+    "available_coverage": {
+      "99.43.4 доллар США": [
+        1999,
+        2002,
+        2005,
+        2008,
+        2011,
+        2014,
+        2017
+      ]
+    }
+  }
+]

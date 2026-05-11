@@ -1,0 +1,90 @@
+{
+  "research_questions": [
+    "Как изменилась доля городского населения и общий коэффициент рождаемости в разных странах мира в период с 2010 по 2022 год?",
+    "Существует ли взаимосвязь между уровнем урбанизации и уровнем рождаемости на страновом уровне в указанный период?"
+  ],
+  "hypotheses": [
+    {
+      "hypothesis": "С ростом доли городского населения общий коэффициент рождаемости снижается.",
+      "rationale": "Урбанизация часто ассоциируется с изменением образа жизни, повышением уровня образования женщин и доступом к контрацепции, что может снижать рождаемость.",
+      "required_indicators": [
+        "urban_population_share",
+        "total_fertility_rate"
+      ]
+    }
+  ],
+  "required_indicators": [
+    {
+      "name": "urban_population_share",
+      "role": "main",
+      "unit": "percent",
+      "preferred_source": "World Bank"
+    },
+    {
+      "name": "total_fertility_rate",
+      "role": "main",
+      "unit": "births_per_woman",
+      "preferred_source": "World Bank"
+    }
+  ],
+  "grouping_methods": [
+    "by_country",
+    "by_region",
+    "by_income_group",
+    "by_time_period"
+  ],
+  "derived_metrics": [
+    {
+      "name": "urbanization_fertility_change",
+      "formula": "Δ(urban_population_share) vs Δ(total_fertility_rate) per country over 2010–2022",
+      "description": "Изменение показателей урбанизации и рождаемости за период для анализа динамики и корреляции."
+    }
+  ],
+  "target_dataset_structure": {
+    "grain": "country-year",
+    "dimensions": [
+      {
+        "name": "country",
+        "type": "string",
+        "description": "Название страны"
+      },
+      {
+        "name": "country_code",
+        "type": "string",
+        "description": "Код страны (ISO или WB)"
+      },
+      {
+        "name": "year",
+        "type": "integer",
+        "description": "Год наблюдения"
+      }
+    ],
+    "indicators": [
+      {
+        "name": "urban_population_share",
+        "type": "float",
+        "unit": "percent",
+        "description": "Доля городского населения в общей численности населения страны"
+      },
+      {
+        "name": "total_fertility_rate",
+        "type": "float",
+        "unit": "births_per_woman",
+        "description": "Общий коэффициент рождаемости"
+      }
+    ]
+  },
+  "expected_visualizations": [
+    "Линейный график динамики urban_population_share и total_fertility_rate по странам (панельные данные)",
+    "Диаграмма рассеяния urban_population_share vs total_fertility_rate с трендовой линией (по странам, усреднённым за период)",
+    "Тепловая карта изменений показателей по регионам",
+    "График с двумя осями (двойной оси) для отображения динамики двух показателей в разрезе отдельной страны"
+  ],
+  "limitations": [
+    "Показатель urban_population_share доступен через датасет с кодом SP.URB.TOTL.IN.ZS, который присутствует в найденных результатах.",
+    "Показатель total_fertility_rate не найден среди предложенных датасетов — его наличие в базе Всемирного банка подтверждается общими знаниями, но конкретный датасет не предоставлен в результатах поиска.",
+    "Отсутствие данных по total_fertility_rate в найденных датасетах делает реализацию исследования невозможной без дополнительного поиска или подтверждения источника.",
+    "Некоторые страны могут иметь пропущенные значения за отдельные годы, что требует обработки пропусков."
+  ],
+  "next_step": "Уточнить наличие и доступность показателя total_fertility_rate (код: SP.DYN.TFRT.IN) в базе данных Всемирного банка и проверить возможность объединения с SP.URB.TOTL.IN.ZS на уровне country-year."
+}

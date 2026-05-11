@@ -8,7 +8,7 @@ import Stepper from './components/Stepper';
 import Auth from './components/Auth';
 import { useAssistant } from './hooks/useAssistant';
 
-const STEPS = ['Запрос', 'Определение', 'Дизайн', 'Структура', 'План', 'Скрипт', 'Сборка'];
+const STEPS = ['Запрос', 'Определение', 'Источники', 'Гипотезы', 'План', 'Скрипт', 'Сборка'];
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('access_token'));

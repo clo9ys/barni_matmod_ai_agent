@@ -1,193 +1,240 @@
+import os
+import sys
 import asyncio
 import json
 import uuid
-import os
-from typing import Dict, Any
-
-from fastapi import APIRouter, Depends, HTTPException, Request
+from pathlib import Path
+from fastapi.responses import FileResponse
+from typing import Dict, Tuple
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlmodel import Session, select
 from sse_starlette.sse import EventSourceResponse
 
 from src.core.database import ResearchTable, User, get_session, engine
 from src.interface.app.auth import get_current_user
-from src.ml.model import complete_json
-from src.ml.prompts import (
-    build_extract_params_messages,
-    build_research_design_messages,
-    build_assembly_plan_messages
-)
-from src.ml.rag import search_datasets
+
+from src.ml.model import complete_json, is_llm_configured
+from src.ml.prompts import build_extract_params_messages, build_research_design_messages, build_assembly_plan_messages
+from src.ml.rag import FULL_FAISS_INDEX_PATH, FULL_METADATA_PATH, search_datasets
 from src.ml.reranker import rerank_datasets
-from src.ml.codegen import generate_analysis_code
+from src.tools.readers import read_fedstatru_coverage
 from src.tools.validator import validate_assembly_plan
+from src.ml.codegen import generate_analysis_code
+from src.core.pipeline import _build_english_query, _merge_candidates, NO_DATA_RERANK_THRESHOLD
 
 router = APIRouter(tags=["research"])
-
-# Хранилище очередей
-event_queues: Dict[str, asyncio.Queue] = {}
+event_queues: Dict[str, Tuple[asyncio.Queue, asyncio.AbstractEventLoop]] = {}
 
 
-async def push_event(task_id: str, data: dict):
-    if task_id in event_queues:
-        await event_queues[task_id].put(data)
-
-
-async def run_agent_worker(task_id: str, query: str, user_id: int):
-    print(f"\n🚀 [WORKER START] Task ID: {task_id}")
-    archive_root = os.getenv("ARCHIVE_ROOT", "data/archive")
-
-    # Небольшая пауза для стабильности стрима
-    await asyncio.sleep(1)
+def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.AbstractEventLoop):
+    def sync_push(data: dict):
+        if task_id in event_queues:
+            queue, main_loop = event_queues[task_id]
+            asyncio.run_coroutine_threadsafe(queue.put(data), main_loop)
 
     with Session(engine) as db:
         db_state = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
-        if not db_state: return
 
         try:
-            # Шаг 2
-            await push_event(task_id, {"type": "log", "message": "🧠 Анализирую запрос..."})
-            params = complete_json(build_extract_params_messages(query))
-            db_state.definition = params
-            db_state.trace = db_state.trace + ["Параметры извлечены"]
-            db.add(db_state)
-            db.commit()
-            db.refresh(db_state)
+            if not is_llm_configured():
+                raise RuntimeError("LLM не настроена. Укажите AI_API_KEY и AI_MODEL в .env")
 
-            await push_event(task_id, {
+            archive_root = os.getenv("ARCHIVE_ROOT", "")
+
+            # ШАГ 1
+            sync_push({"type": "log", "message": "🤖 Извлекаю параметры исследования..."})
+            extracted_params = complete_json(build_extract_params_messages(query))
+            if db_state:
+                db_state.definition = extracted_params
+                db.add(db_state)
+                db.commit()
+
+            if extracted_params.get("query_type") == "no_data":
+                sync_push({"type": "error", "message": "Тема вне компетенции агента."})
+                return
+
+            sync_push({
                 "type": "step_update", "step": 1,
                 "artifact": {
-                    "geography": ", ".join(params.get("geography", [])),
-                    "timeframe": str(params.get("time_period", {}).get("start", "...")),
-                    "perspective": params.get("subject_area", "Экономика"),
-                    "questions": params.get("clarifying_questions", [])
+                    "geography": ", ".join(extracted_params.get("geography", [])),
+                    "timeframe": f"{extracted_params.get('time_period', {}).get('start', '...')}",
+                    "perspective": extracted_params.get("subject_area", "Экономика"),
+                    "questions": extracted_params.get("clarifying_questions", [])
                 }
             })
 
-            # Шаг 3
-            await push_event(task_id, {"type": "log", "message": "📋 Проектирую исследование..."})
-            design = complete_json(build_research_design_messages(query, params))
-            db_state.design = design
-            db_state.trace = db_state.trace + ["Дизайн сформирован"]
-            db.add(db_state)
-            db.commit()
-            db.refresh(db_state)
+            # ШАГ 2
+            sync_push({"type": "log", "message": "🔍 Поиск в реестре НЦСЭД..."})
+            candidates = search_datasets(query, top_k=20, index_path=FULL_FAISS_INDEX_PATH, metadata_path=FULL_METADATA_PATH)
+            top_datasets = rerank_datasets(query, candidates, top_k=5)
 
-            await push_event(task_id, {
+            if not top_datasets or max((d.get("rerank_score", 0.0) for d in top_datasets), default=0.0) < NO_DATA_RERANK_THRESHOLD:
+                sync_push({"type": "error", "message": "Релевантные данные не найдены."})
+                return
+
+            sync_push({
                 "type": "step_update", "step": 2,
                 "artifact": {
+                    "title": top_datasets[0].get('title'),
+                    "tags": top_datasets[0].get('tags', []),
+                    "description": top_datasets[0].get('description'),
+                    "url": top_datasets[0].get('source_url', "#")
+                }
+            })
+
+            # ШАГ 3
+            sync_push({"type": "log", "message": "📝 Генерация гипотез..."})
+            research_design = complete_json(build_research_design_messages(query, extracted_params, top_datasets))
+            if db_state:
+                db_state.design = research_design
+                db.add(db_state)
+                db.commit()
+            sync_push({
+                "type": "step_update", "step": 3,
+                "artifact": {
                     "hypotheses": [
-                        {"id": i, "title": h['hypothesis'], "metrics": h['required_indicators'], "selected": True}
-                        for i, h in enumerate(design.get('hypotheses', []))
+                        {"id": i, "title": h.get('hypothesis'), "metrics": h.get('required_indicators', []), "selected": True}
+                        for i, h in enumerate(research_design.get('hypotheses', []))
                     ]
                 }
             })
 
-            # Шаг 5
-            await push_event(task_id, {"type": "log", "message": "🔍 Поиск в реестре..."})
-            candidates = search_datasets(query, top_k=10)
-            top_datasets = rerank_datasets(query, candidates, top_k=3)
-            assembly_plan = {}
+            # ШАГ 4
+            sync_push({"type": "log", "message": "⚙️ Составление плана сборки..."})
+            assembly_plan = complete_json(build_assembly_plan_messages(query, extracted_params, top_datasets, research_design))
 
-            if top_datasets:
-                best_ds = top_datasets[0]
-                await push_event(task_id, {
-                    "type": "step_update", "step": 4,
-                    "artifact": {
-                        "title": best_ds['title'],
-                        "tags": best_ds.get('tags', []),
-                        "description": best_ds['description'],
-                        "url": best_ds.get('source_url', "#")
-                    }
-                })
+            if isinstance(assembly_plan.get("sources"), list):
+                for plan_source in assembly_plan["sources"]:
+                    for ds in top_datasets:
+                        if plan_source.get("id") == ds.get("id") and "file_path" in ds:
+                            plan_source["file_path"] = ds.get("file_path")
 
-                # План и Валидация
-                plan_msg = build_assembly_plan_messages(query, params, top_datasets, design)
-                assembly_plan = complete_json(plan_msg)
-
-                # Фикс путей
-                for src in assembly_plan.get("primary_sources", []):
-                    if not src.get("file_path"):
-                        match = next((d for d in top_datasets if d['id'] == src.get('dataset_id')), None)
-                        if match: src["file_path"] = match.get("file_path")
-
-                db_state.assembly_plan = assembly_plan
-                db_state.trace = db_state.trace + ["План сборки готов"]
+            if db_state:
+                db_state.assembly_plan = {"plan": assembly_plan, "sources": top_datasets}
                 db.add(db_state)
                 db.commit()
-                db.refresh(db_state)
 
-                val_errors = validate_assembly_plan(assembly_plan, archive_root=archive_root)
-                if val_errors:
-                    await push_event(task_id, {"type": "log", "message": f"⚠️ Валидация: {val_errors[0]}"})
+            if archive_root:
+                errors = validate_assembly_plan(assembly_plan, archive_root=archive_root)
+                if errors:
+                    sync_push({"type": "error", "message": f"Ошибка валидации плана: {errors}"})
+                    return
 
-            # Шаг 6
-            await push_event(task_id, {"type": "log", "message": "💻 Генерация кода..."})
-            code = generate_analysis_code(query, design, top_datasets, archive_root, assembly_plan)
-            db_state.generated_script = code
-            db_state.current_step = 7
-            db.add(db_state);
-            db.commit()
+            sync_push({"type": "step_update", "step": 4, "artifact": {"plan": "Валидация пройдена"}})
 
-            await push_event(task_id, {"type": "done"})
-            print(f"🏁 [WORKER DONE] {task_id}")
+            # ШАГ 5
+            sync_push({"type": "log", "message": "💻 Написание кода обработки..."})
+            code = generate_analysis_code(query, research_design, top_datasets, archive_root=archive_root, assembly_plan=assembly_plan)
+
+            if db_state:
+                db_state.generated_script = code
+                db_state.current_step = 6
+                db.add(db_state)
+                db.commit()
+
+            sync_push({"type": "step_update", "step": 5, "artifact": {"code": code}})
+
+            # ШАГ 6
+            sync_push({"type": "log", "message": "⚙️ Выполняю скрипт в локальной песочнице..."})
+
+            output_dir = Path("data/outputs")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_file = output_dir / f"{task_id}.csv"
+            script_path = output_dir / f"script_{task_id}.py"
+
+            injected_code = f"{code}\n\nimport pandas as pd\ndfs = [v for v in locals().values() if isinstance(v, pd.DataFrame)]\nif dfs:\n    best_df = max(dfs, key=lambda x: len(x))\n    best_df.to_csv(r'{str(output_file.absolute())}', index=False)\n    print(f'SAVED_ROWS: {{len(best_df)}}')"
+
+            with open(script_path, "w", encoding="utf-8") as f:
+                f.write(injected_code)
+
+            import subprocess
+            process = subprocess.run([sys.executable, str(script_path)], capture_output=True, text=True)
+
+            if process.returncode != 0:
+                sync_push({"type": "error", "message": f"Скрипт упал: {process.stderr}"})
+                return
+
+            rows_count = "Неизвестно"
+            for line in process.stdout.split("\n"):
+                if "SAVED_ROWS:" in line:
+                    rows_count = line.split(":")[1].strip()
+
+            result_data = {
+                "message": f"Сборка завершена! Собрано строк: {rows_count}",
+                "file_url": f"/api/v1/download/{task_id}.csv"
+            }
+
+            if db_state:
+                db_state.result_data = result_data
+                db.add(db_state)
+                db.commit()
+
+            sync_push({"type": "step_update", "step": 6, "artifact": result_data})
+            sync_push({"type": "done"})
 
         except Exception as e:
-            print(f"❌ [WORKER ERROR]: {e}")
-            await push_event(task_id, {"type": "error", "message": str(e)})
+            sync_push({"type": "error", "message": str(e)})
+        finally:
+            if task_id in event_queues:
+                del event_queues[task_id]
 
 
 @router.post("/chat")
-async def init_chat(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_session)):
+async def init_chat(request: Request, background_tasks: BackgroundTasks, user: User = Depends(get_current_user), db: Session = Depends(get_session)):
     body = await request.json()
     query = body.get("query")
     task_id = str(uuid.uuid4())
-    event_queues[task_id] = asyncio.Queue()
+    main_loop = asyncio.get_running_loop()
 
-    new_research = ResearchTable(session_id=task_id, query=query, user_id=user.id, trace=["Запуск задачи"])
+    event_queues[task_id] = (asyncio.Queue(), main_loop)
+
+    new_research = ResearchTable(session_id=task_id, query=query, user_id=user.id, trace=["Запуск"])
     db.add(new_research)
     db.commit()
 
-    asyncio.create_task(run_agent_worker(task_id, query, user.id))
+    background_tasks.add_task(run_agent_worker, task_id, query, user.id, main_loop)
     return {"task_id": task_id}
 
 
 @router.get("/stream/{task_id}")
-async def stream_task(request: Request, task_id: str, db: Session = Depends(get_session)):
+async def stream_task(request: Request, task_id: str):
     async def event_generator():
-        # Если очереди нет в памяти, проверяем базу
         if task_id not in event_queues:
-            db_state = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
-            if db_state and db_state.current_step >= 7:
-                yield {"data": json.dumps({"type": "done"})}
-                return
-            else:
-                yield {"data": json.dumps({"type": "error", "message": "Task not found or lost due to server reload"})}
-                return
-
-        queue = event_queues[task_id]
+            yield {"data": json.dumps({"type": "error", "message": "Task not found"})}
+            return
+        queue, _ = event_queues[task_id]
         try:
             while True:
-                if await request.is_disconnected(): break
-                event_data = await queue.get()
-                yield {"data": json.dumps(event_data, ensure_ascii=False)}
-                if event_data.get("type") in ["done", "error"]: break
-        finally:
-            # Не удаляем сразу, даем шанс React Strict Mode
-            await asyncio.sleep(5)
-            if task_id in event_queues: del event_queues[task_id]
-
+                if await request.is_disconnected():
+                    break
+                try:
+                    event_data = await asyncio.wait_for(queue.get(), timeout=10.0)
+                    yield {"data": json.dumps(event_data, ensure_ascii=False)}
+                    if event_data.get("type") in ["done", "error"]:
+                        break
+                except asyncio.TimeoutError:
+                    yield {"data": json.dumps({"type": "ping"})}
+        except Exception:
+            pass
     return EventSourceResponse(event_generator())
-
-
-@router.get("/research/{session_id}")
-async def get_research_detail(session_id: str, db: Session = Depends(get_session),
-                              user: User = Depends(get_current_user)):
-    state = db.exec(select(ResearchTable).where(ResearchTable.session_id == session_id)).first()
-    if not state or state.user_id != user.id:
-        raise HTTPException(status_code=404)
-    return state
 
 
 @router.get("/history")
 async def get_history(user: User = Depends(get_current_user)):
     return user.researches
+
+
+@router.get("/research/{session_id}")
+async def get_research_detail(session_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_session)):
+    res = db.exec(select(ResearchTable).where(ResearchTable.session_id == session_id, ResearchTable.user_id == user.id)).first()
+    if not res:
+        raise HTTPException(status_code=404)
+    return res
+
+
+@router.get("/download/{filename}")
+async def download_file(filename: str):
+    file_path = Path(f"data/outputs/{filename}")
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Файл датасета не найден")
+    return FileResponse(path=file_path, filename=filename, media_type='text/csv')

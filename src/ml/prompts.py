@@ -22,6 +22,7 @@ SYSTEM_PROMPT = """
 EXTRACT_PARAMS_SCHEMA = {
     "query_type": "simple | comparative | research | derived_metric | ambiguous | no_data",
     "original_query": "string",
+    "english_query": "string — English translation of key indicators and geography for semantic search",
     "geography": ["string"],
     "time_period": {
         "start": "integer or null",
@@ -173,51 +174,58 @@ def build_research_design_messages(
 
 
 # ---------------------------------------------------------------------------
-# Reranker prompts
+# Reranker prompts (batch — one LLM call for all candidates)
 # ---------------------------------------------------------------------------
 
-RERANK_SYSTEM_PROMPT = """
-ты — эксперт по оценке релевантности экономических датасетов.
+BATCH_RERANK_SYSTEM_PROMPT = """
+ты — аналитик данных. для каждого датасета прими бинарное решение: подходит он для ответа на запрос или нет.
 
-твоя задача — оценить насколько датасет подходит для ответа на пользовательский запрос.
+правила relevant=1 (датасет подходит) — все три условия должны выполняться:
+1. хотя бы один показатель датасета совпадает или близок к запрошенным индикаторам
+2. география датасета покрывает хотя бы одну из запрошенных стран/регионов
+3. временной период датасета пересекается с запрошенным периодом
+
+правила relevant=0 (датасет не подходит) — достаточно одного:
+- показатели датасета не пересекаются с запрошенными
+- датасет относится к совсем другой теме
+- география или период полностью не совпадают
 
 отвечай только валидным json без markdown:
-{"score": 0.0, "reason": "краткое объяснение"}
+{"rankings": [{"id": "...", "relevant": 1, "reason": "одно предложение почему"}]}
 
-критерии оценки score:
-- 1.0 датасет точно содержит нужные данные
-- 0.7–0.9 датасет очень релевантен, данные скорее всего есть
-- 0.4–0.6 датасет частично подходит, данных может не хватать
-- 0.1–0.3 датасет слабо связан с запросом
-- 0.0 датасет нерелевантен
+каждый датасет из списка должен получить оценку.
 """.strip()
 
 
-def build_rerank_messages(
+def build_batch_rerank_messages(
     query: str,
-    dataset: dict[str, Any],
+    datasets: list[dict[str, Any]],
 ) -> list[dict[str, str]]:
-    dataset_info = {
-        "title": dataset.get("title"),
-        "source": dataset.get("source"),
-        "description": dataset.get("description"),
-        "indicators": dataset.get("indicators"),
-        "geography": dataset.get("geography"),
-        "time_period": dataset.get("time_period"),
-        "tags": dataset.get("tags"),
-    }
+    compact = [
+        {
+            "id": d.get("id"),
+            "title": d.get("title"),
+            "source": d.get("source"),
+            "description": d.get("description"),
+            "indicators": d.get("indicators"),
+            "geography": d.get("geography"),
+            "time_period": d.get("time_period"),
+            "tags": d.get("tags"),
+        }
+        for d in datasets
+    ]
 
     user_prompt = f"""
 запрос пользователя: {query}
 
-датасет:
-{json.dumps(dataset_info, ensure_ascii=False, indent=2)}
+датасеты для оценки ({len(datasets)} шт.):
+{json.dumps(compact, ensure_ascii=False, indent=2)}
 
-оцени релевантность.
+для каждого датасета верни relevant=1 или relevant=0 по правилам из системного промпта.
 """.strip()
 
     return [
-        {"role": "system", "content": RERANK_SYSTEM_PROMPT},
+        {"role": "system", "content": BATCH_RERANK_SYSTEM_PROMPT},
         {"role": "user", "content": user_prompt},
     ]
 
@@ -382,14 +390,15 @@ CODEGEN_SYSTEM_PROMPT = """
 2. объединяет данные из нескольких источников в один pandas dataframe
 3. рассчитывает производные метрики
 4. строит графики
+5. сохраняет итоговый датасет в OUTPUT_DIR
 
 правила кода:
 - только рабочий python-код без пояснений вне кода
 - используй: pandas, numpy, matplotlib, pathlib, datetime
 - не используй requests и не обращайся к внешним api — только локальные файлы
 - полный путь к файлу: Path(ARCHIVE_ROOT) / file_path  (file_path из метаданных датасета)
-- добавляй колонку source (id датасета) и extraction_date (date.today())
-- в конце plt.tight_layout(); plt.show()
+- НЕ используй plt.show() — скрипт запускается headless, GUI недоступен
+- каждый график сохраняй через plt.savefig(OUTPUT_DIR / "plot_N.png", dpi=100, bbox_inches="tight"); plt.close()
 
 == загрузка данных — используй готовые утилиты из src.tools.readers ==
 
@@ -405,6 +414,7 @@ CODEGEN_SYSTEM_PROMPT = """
 
 для World Bank (wb/parquet/*.parquet):
   from src.tools.readers import read_wb_parquet
+  # одна страна:
   df = read_wb_parquet(
       path=Path(ARCHIVE_ROOT) / file_path,
       countryiso3='RUS',    # iso3 код страны
@@ -412,9 +422,62 @@ CODEGEN_SYSTEM_PROMPT = """
   )
   # возвращает DataFrame с колонками: year (int), value (float)
 
-== объединение источников ==
-после загрузки добавь колонки source и extraction_date, объедини через pd.concat,
-удали дубли по году (keep='first' с приоритетом основного источника).
+  # все страны (панельные данные):
+  df = read_wb_parquet(
+      path=Path(ARCHIVE_ROOT) / file_path,
+      countryiso3=None,     # None = все страны
+      years=[2014, ..., 2024],
+  )
+  # возвращает DataFrame с колонками: country (ISO3 str), year (int), value (float)
+
+== трансформация данных — используй готовые утилиты из src.tools.skills ==
+
+from src.tools.skills import (
+    rename_value_column,       # df = rename_value_column(df, "rdexpend_pct_gdp")
+    filter_years,              # df = filter_years(df, [2015,2016,...,2023])
+    join_on_year,              # df = join_on_year(df1, df2, how="outer")
+    join_on_country_year,      # df = join_on_country_year(df1, df2, country_col="country")
+    calculate_index_to_base,   # df = calculate_index_to_base(df, base_year=2015)
+    calculate_per_capita,      # df = calculate_per_capita(df, "value", "population")
+    save_dataset_with_metadata,
+)
+
+== сохранение результата ==
+в конце скрипта ОБЯЗАТЕЛЬНО вызови save_dataset_with_metadata:
+  csv_path, meta_path = save_dataset_with_metadata(
+      df=final_df,
+      output_dir=OUTPUT_DIR,
+      metadata={
+          "query": "...",
+          "sources": ["dataset_id_1", ...],
+          "indicators": ["indicator_name"],
+      },
+      filename="output_dataset",
+  )
+  print(f"saved: {csv_path}")
+
+== объединение нескольких источников ==
+
+ПРАВИЛО: выбирай метод по ситуации:
+
+1. ОДИН показатель, разные периоды (priority_merge) → pd.concat + drop_duplicates:
+  df = pd.concat([df_primary, df_supplementary], ignore_index=True)
+  df = df.drop_duplicates(subset=["year"], keep="first")   # или ["country","year"]
+  df = df.sort_values("year").reset_index(drop=True)
+  НЕ используй join_on_year для одного и того же индикатора — получишь колонки _x/_y!
+
+2. РАЗНЫЕ показатели, объединить в одну строку → join_on_year / join_on_country_year:
+  df = join_on_year(df_gdp, df_population, how="outer")
+  df = join_on_country_year(df_urban, df_fertility, country_col="country")
+  Перед join убери дублирующиеся колонки: df = df.drop(columns=["source","extraction_date"], errors="ignore")
+
+ВАЖНО: колонки source и extraction_date добавляй ТОЛЬКО ПОСЛЕ всех join/merge операций.
+
+== работа с WB панельными данными (countryiso3=None) ==
+WB-файлы содержат агрегаты (регионы, группы стран), поэтому могут быть дубли по (country, year).
+ВСЕГДА дедублируй перед pivot и перед расчётом производных метрик:
+  df = df.drop_duplicates(subset=["country", "year"], keep="first")
+Вместо df.pivot() используй df.pivot_table(aggfunc="first") — это устойчиво к дублям.
 """.strip()
 
 
@@ -424,8 +487,10 @@ def build_codegen_messages(
     datasets: list[dict[str, Any]],
     archive_root: str = "",
     assembly_plan: dict[str, Any] | None = None,
+    output_dir: str = "",
 ) -> list[dict[str, str]]:
     archive_note = f"\nARCHIVE_ROOT = r\"{archive_root}\"" if archive_root else ""
+    output_dir_note = f"\nOUTPUT_DIR = Path(r\"{output_dir}\")" if output_dir else "\nOUTPUT_DIR = Path(\"output_dataset\")"
 
     if assembly_plan:
         # Use the structured plan — LLM gets exact files, filters, and output schema
@@ -457,7 +522,7 @@ def build_codegen_messages(
 напиши python-скрипт для следующего исследования.
 
 запрос: {user_query}
-{archive_note}
+{archive_note}{output_dir_note}
 
 {sources_block}
 

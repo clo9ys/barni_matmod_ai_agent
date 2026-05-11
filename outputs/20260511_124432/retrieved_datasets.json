@@ -1,0 +1,1261 @@
+[
+  {
+    "id": "fedstatru_62685",
+    "title": "Индекс потребительских цен (годовое изменение, процентов)",
+    "description": "Индекс потребительских цен (годовое изменение, процентов)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/62685",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс потребительских цен (годовое изменение, процентов)",
+        "code": "62685",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "62685"
+    ],
+    "text_for_embedding": "Индекс потребительских цен (годовое изменение, процентов)\nИндекс потребительских цен (годовое изменение, процентов)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс потребительских цен (годовое изменение, процентов) 62685 * процент\ndimensions: \ntags: росстат, россия, fedstat, 62685",
+    "file_path": "fedstatru/data/parquet/62685.parquet",
+    "indicator_code": "62685",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8786511421203613
+  },
+  {
+    "id": "fedstatru_57736",
+    "title": "Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.",
+    "description": "Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/57736",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.",
+        "code": "57736",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "57736"
+    ],
+    "text_for_embedding": "Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.\nОценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Оценка изменения цен (тарифов) на услуги  с 2017 г. по 2024 г. 57736 * процент\ndimensions: \ntags: росстат, россия, fedstat, 57736",
+    "file_path": "fedstatru/data/parquet/57736.parquet",
+    "indicator_code": "57736",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8765982389450073
+  },
+  {
+    "id": "fedstatru_43226",
+    "title": "Потребление основных продуктов питания в среднем на потребителя в год",
+    "description": "Потребление основных продуктов питания в среднем на потребителя в год",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/43226",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Потребление основных продуктов питания в среднем на потребителя в год",
+        "code": "43226",
+        "unit": "* килограмм"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "43226"
+    ],
+    "text_for_embedding": "Потребление основных продуктов питания в среднем на потребителя в год\nПотребление основных продуктов питания в среднем на потребителя в год\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Потребление основных продуктов питания в среднем на потребителя в год 43226 * килограмм\ndimensions: \ntags: росстат, россия, fedstat, 43226",
+    "file_path": "fedstatru/data/parquet/43226.parquet",
+    "indicator_code": "43226",
+    "source_id": "fedstatru",
+    "unit": "* килограмм",
+    "score": 0.873108446598053
+  },
+  {
+    "id": "fedstatru_62893",
+    "title": "2.14.И.7.Количество благоустроенных общественных территорий, ед. (нарастающим итогом с 2025 г.) (И4)",
+    "description": "2.14.И.7.Количество благоустроенных общественных территорий, ед. (нарастающим итогом с 2025 г.) (И4)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/62893",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "2.14.И.7.Количество благоустроенных общественных территорий, ед. (нарастающим итогом с 2025 г.) (И4)",
+        "code": "62893",
+        "unit": "* единица"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "62893"
+    ],
+    "text_for_embedding": "2.14.И.7.Количество благоустроенных общественных территорий, ед. (нарастающим итогом с 2025 г.) (И4)\n2.14.И.7.Количество благоустроенных общественных территорий, ед. (нарастающим итогом с 2025 г.) (И4)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: 2.14.И.7.Количество благоустроенных общественных территорий, ед. (нарастающим итогом с 2025 г.) (И4) 62893 * единица\ndimensions: \ntags: росстат, россия, fedstat, 62893",
+    "file_path": "fedstatru/data/parquet/62893.parquet",
+    "indicator_code": "62893",
+    "source_id": "fedstatru",
+    "unit": "* единица",
+    "score": 0.8730564117431641
+  },
+  {
+    "id": "fedstatru_55396",
+    "title": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+    "description": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/55396",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+        "code": "55396",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "55396"
+    ],
+    "text_for_embedding": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)\nИндекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года) 55396 * процент\ndimensions: \ntags: росстат, россия, fedstat, 55396",
+    "file_path": "fedstatru/data/parquet/55396.parquet",
+    "indicator_code": "55396",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8728547096252441
+  },
+  {
+    "id": "fedstatru_51644",
+    "title": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+    "description": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/51644",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)",
+        "code": "51644",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "51644"
+    ],
+    "text_for_embedding": "Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)\nИндекс потребительских цен (декабрь отчетного года к декабрю предыдущего года)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс потребительских цен (декабрь отчетного года к декабрю предыдущего года) 51644 * процент\ndimensions: \ntags: росстат, россия, fedstat, 51644",
+    "file_path": "fedstatru/data/parquet/51644.parquet",
+    "indicator_code": "51644",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8724681735038757
+  },
+  {
+    "id": "fedstatru_62692",
+    "title": "Оценка изменения цен (тарифов) на услуги  с 2025 г.",
+    "description": "Оценка изменения цен (тарифов) на услуги  с 2025 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/62692",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Оценка изменения цен (тарифов) на услуги  с 2025 г.",
+        "code": "62692",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "62692"
+    ],
+    "text_for_embedding": "Оценка изменения цен (тарифов) на услуги  с 2025 г.\nОценка изменения цен (тарифов) на услуги  с 2025 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Оценка изменения цен (тарифов) на услуги  с 2025 г. 62692 * процент\ndimensions: \ntags: росстат, россия, fedstat, 62692",
+    "file_path": "fedstatru/data/parquet/62692.parquet",
+    "indicator_code": "62692",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8708600997924805
+  },
+  {
+    "id": "fedstatru_60825",
+    "title": "Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости",
+    "description": "Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/60825",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости",
+        "code": "60825",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "60825"
+    ],
+    "text_for_embedding": "Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости\nДоля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости 60825 * процент\ndimensions: \ntags: росстат, россия, fedstat, 60825",
+    "file_path": "fedstatru/data/parquet/60825.parquet",
+    "indicator_code": "60825",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8704404830932617
+  },
+  {
+    "id": "fedstatru_60824",
+    "title": "Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости",
+    "description": "Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/60824",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости",
+        "code": "60824",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "60824"
+    ],
+    "text_for_embedding": "Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости\nДоля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Доля населения с рыночными эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного рыночного денежного дохода по населению в целом), проживающая в домохозяйстве, в котором глава домохозяйства - лицо пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости 60824 * процент\ndimensions: \ntags: росстат, россия, fedstat, 60824",
+    "file_path": "fedstatru/data/parquet/60824.parquet",
+    "indicator_code": "60824",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8701499700546265
+  },
+  {
+    "id": "fedstatru_57734",
+    "title": "Оценка изменения спроса на услуги с 2017 г.  по 2024 г.",
+    "description": "Оценка изменения спроса на услуги с 2017 г.  по 2024 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/57734",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Оценка изменения спроса на услуги с 2017 г.  по 2024 г.",
+        "code": "57734",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "57734"
+    ],
+    "text_for_embedding": "Оценка изменения спроса на услуги с 2017 г.  по 2024 г.\nОценка изменения спроса на услуги с 2017 г.  по 2024 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Оценка изменения спроса на услуги с 2017 г.  по 2024 г. 57734 * процент\ndimensions: \ntags: росстат, россия, fedstat, 57734",
+    "file_path": "fedstatru/data/parquet/57734.parquet",
+    "indicator_code": "57734",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8690831661224365
+  },
+  {
+    "id": "fedstatru_58681",
+    "title": "Индекс физического объема валового внутреннего продукта  на душу населения за год, предшествующий предыдущему (8.1.1)",
+    "description": "Индекс физического объема валового внутреннего продукта  на душу населения за год, предшествующий предыдущему (8.1.1)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/58681",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс физического объема валового внутреннего продукта  на душу населения за год, предшествующий предыдущему (8.1.1)",
+        "code": "58681",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "58681"
+    ],
+    "text_for_embedding": "Индекс физического объема валового внутреннего продукта  на душу населения за год, предшествующий предыдущему (8.1.1)\nИндекс физического объема валового внутреннего продукта  на душу населения за год, предшествующий предыдущему (8.1.1)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс физического объема валового внутреннего продукта  на душу населения за год, предшествующий предыдущему (8.1.1) 58681 * процент\ndimensions: \ntags: росстат, россия, fedstat, 58681",
+    "file_path": "fedstatru/data/parquet/58681.parquet",
+    "indicator_code": "58681",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8680871725082397
+  },
+  {
+    "id": "fedstatru_40555",
+    "title": "Индекс физического объема платных услуг населению  (в сопоставимых ценах в % к предыдущему году) по 2016 г.",
+    "description": "Индекс физического объема платных услуг населению  (в сопоставимых ценах в % к предыдущему году) по 2016 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/40555",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс физического объема платных услуг населению  (в сопоставимых ценах в % к предыдущему году) по 2016 г.",
+        "code": "40555",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "40555"
+    ],
+    "text_for_embedding": "Индекс физического объема платных услуг населению  (в сопоставимых ценах в % к предыдущему году) по 2016 г.\nИндекс физического объема платных услуг населению  (в сопоставимых ценах в % к предыдущему году) по 2016 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс физического объема платных услуг населению  (в сопоставимых ценах в % к предыдущему году) по 2016 г. 40555 * процент\ndimensions: \ntags: росстат, россия, fedstat, 40555",
+    "file_path": "fedstatru/data/parquet/40555.parquet",
+    "indicator_code": "40555",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8675254583358765
+  },
+  {
+    "id": "fedstatru_60822",
+    "title": "Доля населения с располагаемыми эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного располагаемого денежного дохода по населению в целом), проживающего в домохозяйствах, в которых глава домохозяйства является лицом моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости",
+    "description": "Доля населения с располагаемыми эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного располагаемого денежного дохода по населению в целом), проживающего в домохозяйствах, в которых глава домохозяйства является лицом моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/60822",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Доля населения с располагаемыми эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного располагаемого денежного дохода по населению в целом), проживающего в домохозяйствах, в которых глава домохозяйства является лицом моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости",
+        "code": "60822",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "60822"
+    ],
+    "text_for_embedding": "Доля населения с располагаемыми эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного располагаемого денежного дохода по населению в целом), проживающего в домохозяйствах, в которых глава домохозяйства является лицом моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости\nДоля населения с располагаемыми эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного располагаемого денежного дохода по населению в целом), проживающего в домохозяйствах, в которых глава домохозяйства является лицом моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Доля населения с располагаемыми эквивалентными денежными доходами ниже относительной черты бедности (50% от медианного эквивалентного располагаемого денежного дохода по населению в целом), проживающего в домохозяйствах, в которых глава домохозяйства является лицом моложе пенсионного возраста, в разбивке по структуре домохозяйств и отношению к занятости 60822 * процент\ndimensions: \ntags: росстат, россия, fedstat, 60822",
+    "file_path": "fedstatru/data/parquet/60822.parquet",
+    "indicator_code": "60822",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8673297762870789
+  },
+  {
+    "id": "fedstatru_59184",
+    "title": "Стоимость питания по основным группам пищевых продуктов (в среднем на потребителя в месяц)",
+    "description": "Стоимость питания по основным группам пищевых продуктов (в среднем на потребителя в месяц)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/59184",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Стоимость питания по основным группам пищевых продуктов (в среднем на потребителя в месяц)",
+        "code": "59184",
+        "unit": "* рубль"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "59184"
+    ],
+    "text_for_embedding": "Стоимость питания по основным группам пищевых продуктов (в среднем на потребителя в месяц)\nСтоимость питания по основным группам пищевых продуктов (в среднем на потребителя в месяц)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Стоимость питания по основным группам пищевых продуктов (в среднем на потребителя в месяц) 59184 * рубль\ndimensions: \ntags: росстат, россия, fedstat, 59184",
+    "file_path": "fedstatru/data/parquet/59184.parquet",
+    "indicator_code": "59184",
+    "source_id": "fedstatru",
+    "unit": "* рубль",
+    "score": 0.8671132326126099
+  },
+  {
+    "id": "fedstatru_31064",
+    "title": "Индекс физического объема бытовых услуг населению (в сопоставимых ценах в % к предыдущему году) по 2016 г.",
+    "description": "Индекс физического объема бытовых услуг населению (в сопоставимых ценах в % к предыдущему году) по 2016 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/31064",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс физического объема бытовых услуг населению (в сопоставимых ценах в % к предыдущему году) по 2016 г.",
+        "code": "31064",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "31064"
+    ],
+    "text_for_embedding": "Индекс физического объема бытовых услуг населению (в сопоставимых ценах в % к предыдущему году) по 2016 г.\nИндекс физического объема бытовых услуг населению (в сопоставимых ценах в % к предыдущему году) по 2016 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс физического объема бытовых услуг населению (в сопоставимых ценах в % к предыдущему году) по 2016 г. 31064 * процент\ndimensions: \ntags: росстат, россия, fedstat, 31064",
+    "file_path": "fedstatru/data/parquet/31064.parquet",
+    "indicator_code": "31064",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8670402765274048
+  },
+  {
+    "id": "fedstatru_58606",
+    "title": "Индексы потребительских цен к среднегодовому значению 2010 г.",
+    "description": "Индексы потребительских цен к среднегодовому значению 2010 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/58606",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индексы потребительских цен к среднегодовому значению 2010 г.",
+        "code": "58606",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "58606"
+    ],
+    "text_for_embedding": "Индексы потребительских цен к среднегодовому значению 2010 г.\nИндексы потребительских цен к среднегодовому значению 2010 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индексы потребительских цен к среднегодовому значению 2010 г. 58606 * процент\ndimensions: \ntags: росстат, россия, fedstat, 58606",
+    "file_path": "fedstatru/data/parquet/58606.parquet",
+    "indicator_code": "58606",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8666545152664185
+  },
+  {
+    "id": "fedstatru_53403",
+    "title": "Отношение численности иностранных граждан, получивших разрешение на работу в Российской Федерации в текущем году, к численности иностранных граждан, получивших разрешение на работу в Российской Федерации в предыдущем году, по данным ФМС России (по 2014 год)",
+    "description": "Отношение численности иностранных граждан, получивших разрешение на работу в Российской Федерации в текущем году, к численности иностранных граждан, получивших разрешение на работу в Российской Федерации в предыдущем году, по данным ФМС России (по 2014 год)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/53403",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Отношение численности иностранных граждан, получивших разрешение на работу в Российской Федерации в текущем году, к численности иностранных граждан, получивших разрешение на работу в Российской Федерации в предыдущем году, по данным ФМС России (по 2014 год)",
+        "code": "53403",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "53403"
+    ],
+    "text_for_embedding": "Отношение численности иностранных граждан, получивших разрешение на работу в Российской Федерации в текущем году, к численности иностранных граждан, получивших разрешение на работу в Российской Федерации в предыдущем году, по данным ФМС России (по 2014 год)\nОтношение численности иностранных граждан, получивших разрешение на работу в Российской Федерации в текущем году, к численности иностранных граждан, получивших разрешение на работу в Российской Федерации в предыдущем году, по данным ФМС России (по 2014 год)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Отношение численности иностранных граждан, получивших разрешение на работу в Российской Федерации в текущем году, к численности иностранных граждан, получивших разрешение на работу в Российской Федерации в предыдущем году, по данным ФМС России (по 2014 год) 53403 * процент\ndimensions: \ntags: росстат, россия, fedstat, 53403",
+    "file_path": "fedstatru/data/parquet/53403.parquet",
+    "indicator_code": "53403",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8661715388298035
+  },
+  {
+    "id": "fedstatru_40609",
+    "title": "Индексы цен на прочую продукцию (затраты, услуги) инвестиционного назначения по 2016 г.",
+    "description": "Индексы цен на прочую продукцию (затраты, услуги) инвестиционного назначения по 2016 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/40609",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индексы цен на прочую продукцию (затраты, услуги) инвестиционного назначения по 2016 г.",
+        "code": "40609",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "40609"
+    ],
+    "text_for_embedding": "Индексы цен на прочую продукцию (затраты, услуги) инвестиционного назначения по 2016 г.\nИндексы цен на прочую продукцию (затраты, услуги) инвестиционного назначения по 2016 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индексы цен на прочую продукцию (затраты, услуги) инвестиционного назначения по 2016 г. 40609 * процент\ndimensions: \ntags: росстат, россия, fedstat, 40609",
+    "file_path": "fedstatru/data/parquet/40609.parquet",
+    "indicator_code": "40609",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8659565448760986
+  },
+  {
+    "id": "fedstatru_43224",
+    "title": "Расходы на потребление, в среднем на члена домашнего хозяйства, в месяц",
+    "description": "Расходы на потребление, в среднем на члена домашнего хозяйства, в месяц",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/43224",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Расходы на потребление, в среднем на члена домашнего хозяйства, в месяц",
+        "code": "43224",
+        "unit": "* рубль"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "43224"
+    ],
+    "text_for_embedding": "Расходы на потребление, в среднем на члена домашнего хозяйства, в месяц\nРасходы на потребление, в среднем на члена домашнего хозяйства, в месяц\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Расходы на потребление, в среднем на члена домашнего хозяйства, в месяц 43224 * рубль\ndimensions: \ntags: росстат, россия, fedstat, 43224",
+    "file_path": "fedstatru/data/parquet/43224.parquet",
+    "indicator_code": "43224",
+    "source_id": "fedstatru",
+    "unit": "* рубль",
+    "score": 0.8656260371208191
+  },
+  {
+    "id": "fedstatru_43561",
+    "title": "Индексы цен производителей по видам экономической деятельности с 2012 г. по 2016 г.",
+    "description": "Индексы цен производителей по видам экономической деятельности с 2012 г. по 2016 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/43561",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индексы цен производителей по видам экономической деятельности с 2012 г. по 2016 г.",
+        "code": "43561",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "43561"
+    ],
+    "text_for_embedding": "Индексы цен производителей по видам экономической деятельности с 2012 г. по 2016 г.\nИндексы цен производителей по видам экономической деятельности с 2012 г. по 2016 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индексы цен производителей по видам экономической деятельности с 2012 г. по 2016 г. 43561 * процент\ndimensions: \ntags: росстат, россия, fedstat, 43561",
+    "file_path": "fedstatru/data/parquet/43561.parquet",
+    "indicator_code": "43561",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8656026721000671
+  },
+  {
+    "id": "wb_fp_cpi_totl_zg",
+    "title": "Inflation, consumer prices (annual %)",
+    "description": "Inflation as measured by the consumer price index reflects the annual percentage change in the cost to the average consumer of acquiring a basket of goods and services that may be fixed or changed at specified intervals, such as yearly. The Laspeyres formula is generally used.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG",
+    "geography": [
+      "world",
+      "countries"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "Annual",
+    "indicators": [
+      {
+        "name": "Inflation, consumer prices (annual %)",
+        "code": "FP.CPI.TOTL.ZG",
+        "unit": ""
+      }
+    ],
+    "dimensions": [
+      "country",
+      "year"
+    ],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "world bank",
+      "fp.cpi.totl.zg"
+    ],
+    "text_for_embedding": "Inflation, consumer prices (annual %)\nInflation as measured by the consumer price index reflects the annual percentage change in the cost to the average consumer of acquiring a basket of goods and services that may be fixed or changed at specified intervals, such as yearly. The Laspeyres formula is generally used.\nsource: World Bank\ngeography: world, countries\ntime period: None-None\nfrequency: Annual\nindicators: Inflation, consumer prices (annual %) FP.CPI.TOTL.ZG \ndimensions: country, year\ntags: world bank, fp.cpi.totl.zg",
+    "file_path": "wb/parquet/FP.CPI.TOTL.ZG.parquet",
+    "indicator_code": "FP.CPI.TOTL.ZG",
+    "source_id": "wb",
+    "unit": null,
+    "score": 0.8619588613510132
+  },
+  {
+    "id": "fedstatru_62987",
+    "title": "Уровень прироста объема средств, полученных в результате коммерциализации прав на результаты интеллектуальной деятельности (РИД), созданных государственными учреждениями в интересах здравоохранения, относительно уровня базового значения (уровень 2023 г.)",
+    "description": "Уровень прироста объема средств, полученных в результате коммерциализации прав на результаты интеллектуальной деятельности (РИД), созданных государственными учреждениями в интересах здравоохранения, относительно уровня базового значения (уровень 2023 г.)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/62987",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Уровень прироста объема средств, полученных в результате коммерциализации прав на результаты интеллектуальной деятельности (РИД), созданных государственными учреждениями в интересах здравоохранения, относительно уровня базового значения (уровень 2023 г.)",
+        "code": "62987",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "62987"
+    ],
+    "text_for_embedding": "Уровень прироста объема средств, полученных в результате коммерциализации прав на результаты интеллектуальной деятельности (РИД), созданных государственными учреждениями в интересах здравоохранения, относительно уровня базового значения (уровень 2023 г.)\nУровень прироста объема средств, полученных в результате коммерциализации прав на результаты интеллектуальной деятельности (РИД), созданных государственными учреждениями в интересах здравоохранения, относительно уровня базового значения (уровень 2023 г.)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Уровень прироста объема средств, полученных в результате коммерциализации прав на результаты интеллектуальной деятельности (РИД), созданных государственными учреждениями в интересах здравоохранения, относительно уровня базового значения (уровень 2023 г.) 62987 * процент\ndimensions: \ntags: росстат, россия, fedstat, 62987",
+    "file_path": "fedstatru/data/parquet/62987.parquet",
+    "indicator_code": "62987",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8600059747695923
+  },
+  {
+    "id": "wb_cptotsaxnzgy",
+    "title": "CPTOTSAXNZGY",
+    "description": "The consumer price index reflects the change in prices for the average consumer of a constant basket of consumer goods. Data is in nominal percentage terms, measured on a year-on-year basis, and seasonally adjusted.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/CPTOTSAXNZGY",
+    "geography": [
+      "world",
+      "countries"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "CPTOTSAXNZGY",
+        "code": "CPTOTSAXNZGY",
+        "unit": ""
+      }
+    ],
+    "dimensions": [
+      "country",
+      "year"
+    ],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "world bank",
+      "cptotsaxnzgy"
+    ],
+    "text_for_embedding": "CPTOTSAXNZGY\nThe consumer price index reflects the change in prices for the average consumer of a constant basket of consumer goods. Data is in nominal percentage terms, measured on a year-on-year basis, and seasonally adjusted.\nsource: World Bank\ngeography: world, countries\ntime period: None-None\nfrequency: \nindicators: CPTOTSAXNZGY CPTOTSAXNZGY \ndimensions: country, year\ntags: world bank, cptotsaxnzgy",
+    "file_path": "wb/parquet/CPTOTSAXNZGY.parquet",
+    "indicator_code": "CPTOTSAXNZGY",
+    "source_id": "wb",
+    "unit": null,
+    "score": 0.8559521436691284
+  },
+  {
+    "id": "fedstatru_62690",
+    "title": "Оценка изменения спроса на услуги с 2025 г.",
+    "description": "Оценка изменения спроса на услуги с 2025 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/62690",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Оценка изменения спроса на услуги с 2025 г.",
+        "code": "62690",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "62690"
+    ],
+    "text_for_embedding": "Оценка изменения спроса на услуги с 2025 г.\nОценка изменения спроса на услуги с 2025 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Оценка изменения спроса на услуги с 2025 г. 62690 * процент\ndimensions: \ntags: росстат, россия, fedstat, 62690",
+    "file_path": "fedstatru/data/parquet/62690.parquet",
+    "indicator_code": "62690",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8542666435241699
+  },
+  {
+    "id": "wb_cptotsaxn",
+    "title": "CPTOTSAXN",
+    "description": "The consumer price index reflects the change in prices for the average consumer of a constant basket of consumer goods. Data is in nominal terms and seasonally adjusted.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/CPTOTSAXN",
+    "geography": [
+      "world",
+      "countries"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "CPTOTSAXN",
+        "code": "CPTOTSAXN",
+        "unit": ""
+      }
+    ],
+    "dimensions": [
+      "country",
+      "year"
+    ],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "world bank",
+      "cptotsaxn"
+    ],
+    "text_for_embedding": "CPTOTSAXN\nThe consumer price index reflects the change in prices for the average consumer of a constant basket of consumer goods. Data is in nominal terms and seasonally adjusted.\nsource: World Bank\ngeography: world, countries\ntime period: None-None\nfrequency: \nindicators: CPTOTSAXN CPTOTSAXN \ndimensions: country, year\ntags: world bank, cptotsaxn",
+    "file_path": "wb/parquet/CPTOTSAXN.parquet",
+    "indicator_code": "CPTOTSAXN",
+    "source_id": "wb",
+    "unit": null,
+    "score": 0.8535666465759277
+  },
+  {
+    "id": "wb_fp_cpi_totl",
+    "title": "Consumer price index (2005 = 100)",
+    "description": "Consumer price index reflects changes in the cost to the average consumer of acquiring a basket of goods and services that may be fixed or changed at specified intervals, such as yearly. The Laspeyres formula is generally used.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/FP.CPI.TOTL",
+    "geography": [
+      "world",
+      "countries"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "Annual",
+    "indicators": [
+      {
+        "name": "Consumer price index (2005 = 100)",
+        "code": "FP.CPI.TOTL",
+        "unit": ""
+      }
+    ],
+    "dimensions": [
+      "country",
+      "year"
+    ],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "world bank",
+      "fp.cpi.totl"
+    ],
+    "text_for_embedding": "Consumer price index (2005 = 100)\nConsumer price index reflects changes in the cost to the average consumer of acquiring a basket of goods and services that may be fixed or changed at specified intervals, such as yearly. The Laspeyres formula is generally used.\nsource: World Bank\ngeography: world, countries\ntime period: None-None\nfrequency: Annual\nindicators: Consumer price index (2005 = 100) FP.CPI.TOTL \ndimensions: country, year\ntags: world bank, fp.cpi.totl",
+    "file_path": "wb/parquet/FP.CPI.TOTL.parquet",
+    "indicator_code": "FP.CPI.TOTL",
+    "source_id": "wb",
+    "unit": null,
+    "score": 0.853181779384613
+  },
+  {
+    "id": "fedstatru_62882",
+    "title": "Численность населения, для которого улучшится качество предоставления коммунальных услуг (в сфере тепло-, водоснабжения и водоотведения), нарастающим итогом с 2025 года (И3)",
+    "description": "Численность населения, для которого улучшится качество предоставления коммунальных услуг (в сфере тепло-, водоснабжения и водоотведения), нарастающим итогом с 2025 года (И3)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/62882",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Численность населения, для которого улучшится качество предоставления коммунальных услуг (в сфере тепло-, водоснабжения и водоотведения), нарастающим итогом с 2025 года (И3)",
+        "code": "62882",
+        "unit": "* миллион человек"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "62882"
+    ],
+    "text_for_embedding": "Численность населения, для которого улучшится качество предоставления коммунальных услуг (в сфере тепло-, водоснабжения и водоотведения), нарастающим итогом с 2025 года (И3)\nЧисленность населения, для которого улучшится качество предоставления коммунальных услуг (в сфере тепло-, водоснабжения и водоотведения), нарастающим итогом с 2025 года (И3)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Численность населения, для которого улучшится качество предоставления коммунальных услуг (в сфере тепло-, водоснабжения и водоотведения), нарастающим итогом с 2025 года (И3) 62882 * миллион человек\ndimensions: \ntags: росстат, россия, fedstat, 62882",
+    "file_path": "fedstatru/data/parquet/62882.parquet",
+    "indicator_code": "62882",
+    "source_id": "fedstatru",
+    "unit": "* миллион человек",
+    "score": 0.8523539304733276
+  },
+  {
+    "id": "fedstatru_62892",
+    "title": "2.14.И.8.Количество реализованных проектов победителей Всероссийского конкурса лучших проектов создания комфортной городской среды, ед. (нарастающим итогом с 2025 г.) (И4)",
+    "description": "2.14.И.8.Количество реализованных проектов победителей Всероссийского конкурса лучших проектов создания комфортной городской среды, ед. (нарастающим итогом с 2025 г.) (И4)",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/62892",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "2.14.И.8.Количество реализованных проектов победителей Всероссийского конкурса лучших проектов создания комфортной городской среды, ед. (нарастающим итогом с 2025 г.) (И4)",
+        "code": "62892",
+        "unit": "* единица"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "62892"
+    ],
+    "text_for_embedding": "2.14.И.8.Количество реализованных проектов победителей Всероссийского конкурса лучших проектов создания комфортной городской среды, ед. (нарастающим итогом с 2025 г.) (И4)\n2.14.И.8.Количество реализованных проектов победителей Всероссийского конкурса лучших проектов создания комфортной городской среды, ед. (нарастающим итогом с 2025 г.) (И4)\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: 2.14.И.8.Количество реализованных проектов победителей Всероссийского конкурса лучших проектов создания комфортной городской среды, ед. (нарастающим итогом с 2025 г.) (И4) 62892 * единица\ndimensions: \ntags: росстат, россия, fedstat, 62892",
+    "file_path": "fedstatru/data/parquet/62892.parquet",
+    "indicator_code": "62892",
+    "source_id": "fedstatru",
+    "unit": "* единица",
+    "score": 0.8522963523864746
+  },
+  {
+    "id": "fedstatru_57737",
+    "title": "Оценка общей экономической ситуации в организации с 2017 г. по 2024 г.",
+    "description": "Оценка общей экономической ситуации в организации с 2017 г. по 2024 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/57737",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Оценка общей экономической ситуации в организации с 2017 г. по 2024 г.",
+        "code": "57737",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "57737"
+    ],
+    "text_for_embedding": "Оценка общей экономической ситуации в организации с 2017 г. по 2024 г.\nОценка общей экономической ситуации в организации с 2017 г. по 2024 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Оценка общей экономической ситуации в организации с 2017 г. по 2024 г. 57737 * процент\ndimensions: \ntags: росстат, россия, fedstat, 57737",
+    "file_path": "fedstatru/data/parquet/57737.parquet",
+    "indicator_code": "57737",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.849333643913269
+  },
+  {
+    "id": "fedstatru_57738",
+    "title": "Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.",
+    "description": "Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/57738",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.",
+        "code": "57738",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "57738"
+    ],
+    "text_for_embedding": "Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.\nОценка тенденций изменения экономической ситуации с 2017 г. по 2024 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Оценка тенденций изменения экономической ситуации с 2017 г. по 2024 г. 57738 * процент\ndimensions: \ntags: росстат, россия, fedstat, 57738",
+    "file_path": "fedstatru/data/parquet/57738.parquet",
+    "indicator_code": "57738",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8492661714553833
+  },
+  {
+    "id": "wb_cptotnsxn",
+    "title": "CPTOTNSXN",
+    "description": "The consumer price index reflects the change in prices for the average consumer of a constant basket of consumer goods. Data is not seasonally adjusted.",
+    "source": "World Bank",
+    "source_url": "https://data.worldbank.org/indicator/CPTOTNSXN",
+    "geography": [
+      "world",
+      "countries"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "CPTOTNSXN",
+        "code": "CPTOTNSXN",
+        "unit": ""
+      }
+    ],
+    "dimensions": [
+      "country",
+      "year"
+    ],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "world bank",
+      "cptotnsxn"
+    ],
+    "text_for_embedding": "CPTOTNSXN\nThe consumer price index reflects the change in prices for the average consumer of a constant basket of consumer goods. Data is not seasonally adjusted.\nsource: World Bank\ngeography: world, countries\ntime period: None-None\nfrequency: \nindicators: CPTOTNSXN CPTOTNSXN \ndimensions: country, year\ntags: world bank, cptotnsxn",
+    "file_path": "wb/parquet/CPTOTNSXN.parquet",
+    "indicator_code": "CPTOTNSXN",
+    "source_id": "wb",
+    "unit": null,
+    "score": 0.8492649793624878
+  },
+  {
+    "id": "fedstatru_57739",
+    "title": "Индекс предпринимательской уверенности  с 2017 г. по 2024 г.",
+    "description": "Индекс предпринимательской уверенности  с 2017 г. по 2024 г.",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/57739",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Индекс предпринимательской уверенности  с 2017 г. по 2024 г.",
+        "code": "57739",
+        "unit": "* процент"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "57739"
+    ],
+    "text_for_embedding": "Индекс предпринимательской уверенности  с 2017 г. по 2024 г.\nИндекс предпринимательской уверенности  с 2017 г. по 2024 г.\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Индекс предпринимательской уверенности  с 2017 г. по 2024 г. 57739 * процент\ndimensions: \ntags: росстат, россия, fedstat, 57739",
+    "file_path": "fedstatru/data/parquet/57739.parquet",
+    "indicator_code": "57739",
+    "source_id": "fedstatru",
+    "unit": "* процент",
+    "score": 0.8492158055305481
+  },
+  {
+    "id": "fedstatru_37252",
+    "title": "Средние потребительские цены на отдельные товары для индексации государственных целевых беспроцентных займов",
+    "description": "Средние потребительские цены на отдельные товары для индексации государственных целевых беспроцентных займов",
+    "source": "Rosstat / Fedstat",
+    "source_url": "https://fedstat.ru/indicator/37252",
+    "geography": [
+      "Russia",
+      "Russian regions"
+    ],
+    "time_period": {
+      "start": null,
+      "end": null
+    },
+    "frequency": "",
+    "indicators": [
+      {
+        "name": "Средние потребительские цены на отдельные товары для индексации государственных целевых беспроцентных займов",
+        "code": "37252",
+        "unit": "* рубль"
+      }
+    ],
+    "dimensions": [],
+    "format": "parquet",
+    "availability": null,
+    "tags": [
+      "росстат",
+      "россия",
+      "fedstat",
+      "37252"
+    ],
+    "text_for_embedding": "Средние потребительские цены на отдельные товары для индексации государственных целевых беспроцентных займов\nСредние потребительские цены на отдельные товары для индексации государственных целевых беспроцентных займов\nsource: Rosstat / Fedstat\ngeography: Russia, Russian regions\ntime period: None-None\nfrequency: \nindicators: Средние потребительские цены на отдельные товары для индексации государственных целевых беспроцентных займов 37252 * рубль\ndimensions: \ntags: росстат, россия, fedstat, 37252",
+    "file_path": "fedstatru/data/parquet/37252.parquet",
+    "indicator_code": "37252",
+    "source_id": "fedstatru",
+    "unit": "* рубль",
+    "score": 0.8480063676834106
+  }
+]

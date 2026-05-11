@@ -28,14 +28,56 @@ export function useAssistant(token) {
 
             setInitialQuery(data.query);
             setCurrentStep(data.current_step);
-            setViewStep(1);
+            setViewStep(1); // При загрузке показываем первый шаг
 
-            setArtifacts({
-                1: data.definition,
-                2: data.design,
-                3: data.structure,
-                4: data.assembly_plan
-            });
+            // МАППИНГ: Превращаем сырые данные из БД в формат для карточек
+            const mappedArtifacts = {};
+
+            if (data.definition) {
+                mappedArtifacts[1] = {
+                    geography: data.definition.geography?.join(', ') || '',
+                    timeframe: data.definition.time_period?.start || '...',
+                    perspective: data.definition.subject_area || 'Экономика',
+                    questions: data.definition.clarifying_questions || []
+                };
+            }
+
+            if (data.design && data.design.hypotheses) {
+                mappedArtifacts[2] = {
+                    hypotheses: data.design.hypotheses.map((h, i) => ({
+                        id: i,
+                        title: h.hypothesis,
+                        metrics: h.required_indicators || [],
+                        selected: true
+                    }))
+                };
+            }
+
+            // Шаг 3: Структура (пока резерв)
+            if (data.structure) mappedArtifacts[3] = data.structure;
+
+            // Шаг 4: Источники (вытаскиваем первый датасет из плана)
+            if (data.assembly_plan && data.assembly_plan.sources && data.assembly_plan.sources.length > 0) {
+                const bestDs = data.assembly_plan.sources[0];
+                mappedArtifacts[4] = {
+                    title: bestDs.title,
+                    tags: bestDs.tags || [],
+                    description: bestDs.description,
+                    url: bestDs.source_url || '#'
+                };
+            }
+
+            // Шаг 5: Сгенерированный код
+            if (data.generated_script) {
+                mappedArtifacts[5] = { code: data.generated_script };
+            }
+
+            // Шаг 6: Финальная сборка
+            if (data.result_data) {
+                mappedArtifacts[6] = { message: "Данные успешно собраны", details: data.result_data };
+            }
+
+            setArtifacts(mappedArtifacts);
             setLogs([{ text: 'История успешно загружена', type: 'dimmed' }]);
         } catch (e) {
             console.error("Ошибка загрузки истории", e);
@@ -55,6 +97,9 @@ export function useAssistant(token) {
         setCurrentStep(0);
         setViewStep(0);
 
+        // Добавляем контроллер для жесткого прерывания реконнектов
+        const ctrl = new AbortController();
+
         try {
             const response = await fetch('http://localhost:8000/api/v1/chat', {
                 method: 'POST',
@@ -70,6 +115,7 @@ export function useAssistant(token) {
 
             await fetchEventSource(`http://localhost:8000/api/v1/stream/${task_id}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
+                signal: ctrl.signal, // Передаем сигнал отмены
                 onmessage(msg) {
                     if (!msg.data) return;
 
@@ -87,22 +133,28 @@ export function useAssistant(token) {
                         } else if (data.type === 'done') {
                             setIsProcessing(false);
                             setLogs(prev => [...prev, { text: 'Анализ завершен', type: 'dimmed' }]);
+                            ctrl.abort(); // Жестко прерываем реконнект
                         } else if (data.type === 'error') {
                             setIsProcessing(false);
                             setLogs(prev => [...prev, { text: `Ошибка: ${data.message}`, type: 'error' }]);
+                            ctrl.abort(); // Жестко прерываем реконнект
                         }
                     } catch (parseError) {
                         console.warn("Ошибка парсинга JSON из потока:", msg.data);
                     }
                 },
                 onerror(err) {
+                    // Игнорируем ошибку AbortError (мы сами ее вызвали)
+                    if (err.name === 'AbortError') return;
                     setIsProcessing(false);
-                    throw err;
+                    throw err; // Прокидываем ошибку дальше, чтобы остановить SSE
                 }
             });
         } catch (error) {
-            setLogs(prev => [...prev, { text: `Ошибка: ${error.message}`, type: 'error' }]);
-            setIsProcessing(false);
+            if (error.name !== 'AbortError') {
+                setLogs(prev => [...prev, { text: `Ошибка: ${error.message}`, type: 'error' }]);
+                setIsProcessing(false);
+            }
         }
     }, [token]);
 
