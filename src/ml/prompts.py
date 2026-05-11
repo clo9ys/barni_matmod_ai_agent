@@ -22,7 +22,7 @@ SYSTEM_PROMPT = """
 EXTRACT_PARAMS_SCHEMA = {
     "query_type": "simple | comparative | research | derived_metric | ambiguous | no_data",
     "original_query": "string",
-    "english_query": "string — English translation of key indicators and geography for semantic search",
+    "english_query": "string — English search phrase using official statistical terminology, NOT colloquial translation. Examples: use 'consumer price index CPI' not 'inflation'; 'gross domestic product GDP' not 'economic growth'; 'unemployment rate' not 'joblessness'; 'gross fixed capital formation' not 'investment'",
     "geography": ["string"],
     "time_period": {
         "start": "integer or null",
@@ -108,6 +108,14 @@ def build_extract_params_messages(user_query: str) -> list[dict[str, str]]:
 {format_json_schema(EXTRACT_PARAMS_SCHEMA)}
 
 подсказки:
+- english_query: обязательно используй официальные статистические термины на английском, не разговорный перевод:
+  инфляция → "consumer price index CPI inflation"
+  ВВП/валовый продукт → "gross domestic product GDP"
+  безработица → "unemployment rate labor market"
+  инвестиции → "gross fixed capital formation investment"
+  зарплата → "average wage salary earnings"
+  население → "population demographics"
+  торговый баланс → "trade balance exports imports"
 - query_type = simple, если пользователь просит один показатель
 - query_type = comparative, если нужно сравнение стран, регионов, периодов или показателей
 - query_type = research, если пользователь спрашивает связь, влияние, зависимость или хочет проверить гипотезу
@@ -295,7 +303,7 @@ ASSEMBLY_PLAN_SCHEMA = {
             "years_used": ["int — только те годы, которые реально есть в файле"],
             "filters": {
                 "okato": "string или null — код ОКАТО (для Fedstat; 643 = Россия)",
-                "period": "string или null — код периода (62=декабрь, 30=год, 118=янв-дек)",
+                "period": "string или null — код периода; ТОЛЬКО числовая часть ключа из available_coverage (например '62 декабрь' → '62'); НЕ используй период которого нет в available_coverage",
                 "countryiso3": "string или null — ISO3 (для WB; RUS = Россия)",
             },
             "reason": "string — почему выбран этот источник",
@@ -411,6 +419,7 @@ CODEGEN_SYSTEM_PROMPT = """
 - полный путь к файлу: Path(ARCHIVE_ROOT) / file_path  (file_path из метаданных датасета)
 - НЕ используй plt.show() — скрипт запускается headless, GUI недоступен
 - каждый график сохраняй через plt.savefig(OUTPUT_DIR / "plot_N.png", dpi=100, bbox_inches="tight"); plt.close()
+- при использовании plt.xticks() всегда приводи year к int: plt.xticks(final_df["year"].astype(int))
 
 == загрузка данных — используй готовые утилиты из src.tools.readers ==
 

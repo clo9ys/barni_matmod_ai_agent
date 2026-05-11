@@ -8,15 +8,16 @@ import Stepper from './components/Stepper';
 import Auth from './components/Auth';
 import { useAssistant } from './hooks/useAssistant';
 
-const STEPS = ['Запрос', 'Определение', 'Источники', 'Гипотезы', 'План', 'Скрипт', 'Сборка'];
+const STEPS = ['Запрос', 'Определение', 'Источники', 'Гипотезы', 'План', 'Скрипт', 'Результаты'];
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('access_token'));
 
   const {
     currentStep, viewStep, setViewStep,
-    logs, artifacts, isProcessing,
-    initialQuery, sendMessage, loadResearch, resetAssistant
+    logs, artifacts, isProcessing, isRefining, awaitingConfirmation,
+    initialQuery, sessionId,
+    sendMessage, loadResearch, resetAssistant, confirmStep, refineFromStep
   } = useAssistant(token);
 
   if (!token) return <Auth onLogin={(t) => { localStorage.setItem('access_token', t); setToken(t); }} />;
@@ -37,7 +38,7 @@ export default function App() {
 
           <div className="workspace">
             <section className="chat-panel">
-              <Chat onSend={sendMessage} disabled={isProcessing} query={initialQuery} />
+              <Chat onSend={sendMessage} disabled={isProcessing && !awaitingConfirmation} query={initialQuery} />
             </section>
 
             <section className="artifact-panel">
@@ -45,6 +46,11 @@ export default function App() {
                   step={viewStep}
                   data={artifacts[viewStep]}
                   query={initialQuery}
+                  onRefine={refineFromStep}
+                  onConfirm={confirmStep}
+                  isRefining={isRefining}
+                  awaitingConfirmation={awaitingConfirmation}
+                  canRefine={!!sessionId && viewStep > 0 && viewStep < 6 && !!artifacts[viewStep]}
               />
             </section>
           </div>
