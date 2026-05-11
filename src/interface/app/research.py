@@ -1,4 +1,5 @@
 import os
+import sys
 import asyncio
 import json
 import uuid
@@ -11,11 +12,8 @@ from sse_starlette.sse import EventSourceResponse
 from src.core.database import ResearchTable, User, get_session, engine
 from src.interface.app.auth import get_current_user
 
-# Импорты ML-пайплайна
 from src.ml.model import complete_json, is_llm_configured
 from src.ml.prompts import build_extract_params_messages, build_research_design_messages, build_assembly_plan_messages
-# from src.ml.rag import FAISS_INDEX_PATH, METADATA_PATH, search_datasets
-# Вместо старого импорта RAG:
 from src.ml.rag import FULL_FAISS_INDEX_PATH, FULL_METADATA_PATH, search_datasets
 from src.ml.reranker import rerank_datasets
 from src.tools.readers import read_fedstatru_coverage
@@ -41,7 +39,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
 
             archive_root = os.getenv("ARCHIVE_ROOT", "")
 
-            # ШАГ 1: ПАРАМЕТРЫ
+            # ШАГ 1
             sync_push({"type": "log", "message": "🤖 Извлекаю параметры исследования..."})
             extracted_params = complete_json(build_extract_params_messages(query))
             if db_state:
@@ -63,7 +61,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 }
             })
 
-            # ШАГ 2: ПОИСК (ИСТОЧНИКИ) - Теперь это Шаг 2
+            # ШАГ 2
             sync_push({"type": "log", "message": "🔍 Поиск в реестре НЦСЭД..."})
             candidates = search_datasets(query, top_k=20, index_path=FULL_FAISS_INDEX_PATH, metadata_path=FULL_METADATA_PATH)
             top_datasets = rerank_datasets(query, candidates, top_k=5)
@@ -82,15 +80,13 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 }
             })
 
-            # ШАГ 3: ДИЗАЙН (ГИПОТЕЗЫ) - Теперь это Шаг 3
+            # ШАГ 3
             sync_push({"type": "log", "message": "📝 Генерация гипотез..."})
             research_design = complete_json(build_research_design_messages(query, extracted_params, top_datasets))
-
             if db_state:
                 db_state.design = research_design
                 db.add(db_state)
                 db.commit()
-
             sync_push({
                 "type": "step_update", "step": 3,
                 "artifact": {
@@ -101,24 +97,18 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 }
             })
 
-            # ШАГ 4: ПЛАН И ВАЛИДАЦИЯ
+            # ШАГ 4
             sync_push({"type": "log", "message": "⚙️ Составление плана сборки..."})
             assembly_plan = complete_json(build_assembly_plan_messages(query, extracted_params, top_datasets, research_design))
 
-            # --- ФИКС: Защита от забывчивости LLM ---
-            # Принудительно восстанавливаем file_path из оригинальных датасетов
             if isinstance(assembly_plan.get("sources"), list):
                 for plan_source in assembly_plan["sources"]:
                     for ds in top_datasets:
                         if plan_source.get("id") == ds.get("id") and "file_path" in ds:
                             plan_source["file_path"] = ds.get("file_path")
-            # ----------------------------------------
 
             if db_state:
-                db_state.assembly_plan = {
-                    "plan": assembly_plan,
-                    "sources": top_datasets
-                }
+                db_state.assembly_plan = {"plan": assembly_plan, "sources": top_datasets}
                 db.add(db_state)
                 db.commit()
 
@@ -130,7 +120,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
 
             sync_push({"type": "step_update", "step": 4, "artifact": {"plan": "Валидация пройдена"}})
 
-            # ШАГ 5: CODEGEN
+            # ШАГ 5
             sync_push({"type": "log", "message": "💻 Написание кода обработки..."})
             code = generate_analysis_code(query, research_design, top_datasets, archive_root=archive_root, assembly_plan=assembly_plan)
 
@@ -142,7 +132,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
 
             sync_push({"type": "step_update", "step": 5, "artifact": {"code": code}})
 
-            # ШАГ 6: СБОРКА ДАННЫХ И ОТДАЧА ФАЙЛА
+            # ШАГ 6
             sync_push({"type": "log", "message": "⚙️ Выполняю скрипт в локальной песочнице..."})
 
             output_dir = Path("data/outputs")
@@ -150,26 +140,17 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             output_file = output_dir / f"{task_id}.csv"
             script_path = output_dir / f"script_{task_id}.py"
 
-            # Магия песочницы: дописываем к коду автосохранение результата
-            injected_code = f"""
-{code}
+            injected_code = f"{code}\n\nimport pandas as pd\ndfs = [v for v in locals().values() if isinstance(v, pd.DataFrame)]\nif dfs:\n    best_df = max(dfs, key=lambda x: len(x))\n    best_df.to_csv(r'{str(output_file.absolute())}', index=False)\n    print(f'SAVED_ROWS: {{len(best_df)}}')"
 
-# --- Автосохранение результата для БАРНИ ---
-import pandas as pd
-# Ищем все созданные pandas DataFrame и сохраняем самый большой (итоговый)
-dfs = [v for v in locals().values() if isinstance(v, pd.DataFrame)]
-if dfs:
-    best_df = max(dfs, key=lambda x: len(x))
-    best_df.to_csv(r'{str(output_file.absolute())}', index=False)
-    print(f"SAVED_ROWS: {{len(best_df)}}")
-"""
             with open(script_path, "w", encoding="utf-8") as f:
                 f.write(injected_code)
 
             import subprocess
-            process = subprocess.run(["python", str(script_path)], capture_output=True, text=True)
+            # ФИКС 2: Используем sys.executable, чтобы скрипт точно запустился с нужными библиотеками (pandas)
+            process = subprocess.run([sys.executable, str(script_path)], capture_output=True, text=True)
 
             if process.returncode != 0:
+                # Теперь, если код сгенерировался с ошибкой, мы увидим её на фронтенде
                 sync_push({"type": "error", "message": f"Скрипт упал: {process.stderr}"})
                 return
 
@@ -194,7 +175,6 @@ if dfs:
         except Exception as e:
             sync_push({"type": "error", "message": str(e)})
         finally:
-            # Удаляем очередь ТОЛЬКО когда воркер полностью завершил работу
             if task_id in event_queues:
                 del event_queues[task_id]
 
@@ -223,32 +203,18 @@ async def stream_task(request: Request, task_id: str):
         queue, _ = event_queues[task_id]
         try:
             while True:
-                if await request.is_disconnected(): break # Выходим, но НЕ удаляем очередь
-                event_data = await queue.get()
-                yield {"data": json.dumps(event_data, ensure_ascii=False)}
-                if event_data.get("type") in ["done", "error"]: break
-        except Exception as e:
-            pass # Игнорируем ошибки обрыва
-    return EventSourceResponse(event_generator())
-
-@router.get("/stream/{task_id}")
-async def stream_task(request: Request, task_id: str):
-    async def event_generator():
-        if task_id not in event_queues:
-            # Если мы здесь, значит сервер перезагрузился и память пуста
-            yield {"data": json.dumps({"type": "error", "message": "Task not found (Server restarted)"})}
-            return
-
-        queue, _ = event_queues[task_id]
-        try:
-            while True:
                 if await request.is_disconnected(): break
-                event_data = await queue.get()
-                yield {"data": json.dumps(event_data, ensure_ascii=False)}
-                if event_data.get("type") in ["done", "error"]: break
-        finally:
-            if task_id in event_queues: del event_queues[task_id]
-
+                try:
+                    # ФИКС 1: Механизм анти-таймаута
+                    # Ждем ответ 10 секунд. Если модель еще думает, кидаем пинг.
+                    event_data = await asyncio.wait_for(queue.get(), timeout=10.0)
+                    yield {"data": json.dumps(event_data, ensure_ascii=False)}
+                    if event_data.get("type") in ["done", "error"]: break
+                except asyncio.TimeoutError:
+                    # Пинг-сообщение не дает браузеру оборвать соединение
+                    yield {"data": json.dumps({"type": "ping"})}
+        except Exception:
+            pass
     return EventSourceResponse(event_generator())
 
 @router.get("/history")
