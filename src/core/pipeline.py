@@ -195,9 +195,20 @@ def run(
         build_assembly_plan_messages(user_query, extracted_params, top_datasets, research_design),
     )
 
-    # Step 5.5: Validate assembly plan against local archive
+    # Step 5.5: Validate assembly plan against local archive (with one retry)
     if archive_root:
         validation_errors = validate_assembly_plan(assembly_plan, archive_root=archive_root)
+        if validation_errors:
+            assembly_plan = complete_json(
+                build_assembly_plan_messages(
+                    user_query,
+                    extracted_params,
+                    top_datasets,
+                    research_design,
+                    validation_errors=validation_errors,
+                ),
+            )
+            validation_errors = validate_assembly_plan(assembly_plan, archive_root=archive_root)
         if validation_errors:
             return {
                 **base_result,

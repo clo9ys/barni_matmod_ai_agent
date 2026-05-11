@@ -65,7 +65,13 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
 
             # ШАГ 2
             sync_push({"type": "log", "message": "🔍 Поиск в реестре НЦСЭД..."})
-            candidates = search_datasets(query, top_k=20, index_path=FULL_FAISS_INDEX_PATH, metadata_path=FULL_METADATA_PATH)
+            candidates_ru = search_datasets(query, top_k=20, index_path=FULL_FAISS_INDEX_PATH, metadata_path=FULL_METADATA_PATH)
+            english_query = _build_english_query(extracted_params)
+            if english_query and english_query.lower() not in query.lower():
+                candidates_en = search_datasets(english_query, top_k=20, index_path=FULL_FAISS_INDEX_PATH, metadata_path=FULL_METADATA_PATH)
+            else:
+                candidates_en = []
+            candidates = _merge_candidates(candidates_ru, candidates_en)
             top_datasets = rerank_datasets(query, candidates, top_k=5)
 
             if not top_datasets or max((d.get("rerank_score", 0.0) for d in top_datasets), default=0.0) < NO_DATA_RERANK_THRESHOLD:
@@ -137,7 +143,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             # ШАГ 6
             sync_push({"type": "log", "message": "⚙️ Выполняю скрипт в локальной песочнице..."})
 
-            output_dir = Path("data/outputs")
+            output_dir = Path(__file__).parent.parent.parent.parent / "data" / "outputs"
             output_dir.mkdir(parents=True, exist_ok=True)
             output_file = output_dir / f"{task_id}.csv"
             script_path = output_dir / f"script_{task_id}.py"
@@ -148,7 +154,17 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 f.write(injected_code)
 
             import subprocess
-            process = subprocess.run([sys.executable, str(script_path)], capture_output=True, text=True)
+            project_root = str(Path(__file__).parent.parent.parent.parent)
+            _env = os.environ.copy()
+            _env["PYTHONPATH"] = project_root
+            _env["MPLBACKEND"] = "Agg"
+            process = subprocess.run(
+                [sys.executable, str(script_path)],
+                capture_output=True,
+                text=True,
+                cwd=project_root,
+                env=_env,
+            )
 
             if process.returncode != 0:
                 sync_push({"type": "error", "message": f"Скрипт упал: {process.stderr}"})

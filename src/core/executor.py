@@ -43,7 +43,7 @@ def run_script(
             errors=[f"generated_script.py не найден в {session_dir}"],
         )
 
-    project_root = str(session_dir.parent.parent)
+    project_root = str(Path(__file__).parent.parent.parent)
     env = os.environ.copy()
     env["PYTHONPATH"] = project_root
     env["MPLBACKEND"] = "Agg"  # non-interactive backend, no GUI window

@@ -325,6 +325,7 @@ def build_assembly_plan_messages(
     extracted_params: dict[str, Any],
     top_datasets: list[dict[str, Any]],
     research_design: dict[str, Any],
+    validation_errors: list[str] | None = None,
 ) -> list[dict[str, str]]:
     compact_datasets = [
         {
@@ -343,6 +344,17 @@ def build_assembly_plan_messages(
         for d in top_datasets
     ]
 
+    retry_block = ""
+    if validation_errors:
+        errors_str = "\n".join(f"  - {e}" for e in validation_errors)
+        retry_block = f"""
+ВНИМАНИЕ: предыдущий план провалил валидацию. Исправь следующие ошибки:
+{errors_str}
+
+Если датасет не содержит нужных фильтров (okato/period/country) — выбери другой датасет из списка.
+Для международных данных (не Россия) предпочитай World Bank (wb) источники с нужным countryiso3.
+"""
+
     user_prompt = f"""
 запрос: {user_query}
 
@@ -352,7 +364,7 @@ def build_assembly_plan_messages(
 
 доступные датасеты (выбирай только из этого списка):
 {json.dumps(compact_datasets, ensure_ascii=False, indent=2)}
-
+{retry_block}
 составь план сборки по схеме:
 {format_json_schema(ASSEMBLY_PLAN_SCHEMA)}
 
