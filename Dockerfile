@@ -27,14 +27,16 @@ RUN uv sync --frozen --no-dev
 
 # Копируем исходный код
 COPY src ./src
-COPY data ./data
 
 # Копируем собранный фронтенд в папку dist, которую ищет backend
 COPY --from=frontend-builder /app/frontend/dist ./dist
 
-# Предварительная загрузка ML-моделей (чтобы не качать при старте)
-# Мы запустим короткий скрипт, который инициализирует sentence-transformers
-RUN . .venv/bin/activate && python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+# Предварительная загрузка ML-моделей при сборке образа
+RUN .venv/bin/python -c "\
+from sentence_transformers import SentenceTransformer, CrossEncoder; \
+import torch.nn as nn; \
+SentenceTransformer('intfloat/multilingual-e5-small'); \
+CrossEncoder('BAAI/bge-reranker-v2-m3', default_activation_function=nn.Sigmoid())"
 
 # Экспонируем порт
 EXPOSE 8000
