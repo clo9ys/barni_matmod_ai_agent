@@ -171,8 +171,10 @@ export function useAssistant(token, onNewTask) {
                     }
                 },
                 onerror(err) {
-                    if (err.name === 'AbortError') return;
-                    setIsProcessing(false);
+                    if (err.name !== 'AbortError') {
+                        setIsProcessing(false);
+                        setAwaitingClarification(false);
+                    }
                     throw err;
                 }
             });
