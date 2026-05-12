@@ -281,10 +281,15 @@ async def init_chat(request: Request, background_tasks: BackgroundTasks, user: U
 
 
 @router.get("/stream/{task_id}")
-async def stream_task(request: Request, task_id: str):
+async def stream_task(request: Request, task_id: str, db: Session = Depends(get_session)):
     async def event_generator():
         if task_id not in event_queues:
-            yield {"data": json.dumps({"type": "error", "message": "Task not found"})}
+            task = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
+            if task and task.current_step >= 6 and task.result_data:
+                yield {"data": json.dumps({"type": "step_update", "step": 6, "artifact": task.result_data}, ensure_ascii=False)}
+                yield {"data": json.dumps({"type": "done"})}
+            else:
+                yield {"data": json.dumps({"type": "error", "message": "Task not found"})}
             return
         queue, _ = event_queues[task_id]
         try:
