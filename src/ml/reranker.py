@@ -15,7 +15,7 @@ _reranker_cache: dict[str, CrossEncoder] = {}
 
 def _load_reranker(model_name: str = DEFAULT_RERANKER_MODEL) -> CrossEncoder:
     if model_name not in _reranker_cache:
-        _reranker_cache[model_name] = CrossEncoder(model_name, default_activation_function=nn.Sigmoid())
+        _reranker_cache[model_name] = CrossEncoder(model_name, activation_fn=nn.Sigmoid())
     return _reranker_cache[model_name]
 
 
