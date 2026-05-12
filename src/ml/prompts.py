@@ -20,7 +20,7 @@ SYSTEM_PROMPT = """
 
 
 EXTRACT_PARAMS_SCHEMA = {
-    "query_type": "simple | comparative | research | derived_metric | ambiguous | no_data",
+    "query_type": "simple | comparative | research | derived_metric | ambiguous | no_data | no_coverage",
     "original_query": "string",
     "english_query": "string — English search phrase using official statistical terminology, NOT colloquial translation. Examples: use 'consumer price index CPI' not 'inflation'; 'gross domestic product GDP' not 'economic growth'; 'unemployment rate' not 'joblessness'; 'gross fixed capital formation' not 'investment'",
     "geography": ["string"],
@@ -121,7 +121,8 @@ def build_extract_params_messages(user_query: str) -> list[dict[str, str]]:
 - query_type = research, если пользователь спрашивает связь, влияние, зависимость или хочет проверить гипотезу
 - query_type = derived_metric, если нужно рассчитать индекс, долю, отношение, показатель на душу населения или поправку на инфляцию
 - query_type = ambiguous, если непонятны география, период, показатель или единицы
-- query_type = no_data, если в запросе явно спрашивается то, что скорее всего отсутствует в экономических источниках
+- query_type = no_data, если запрос вообще не про экономику и статистику: рецепты, фильмы, спорт, политические мнения, художественная литература и т.п.
+- query_type = no_coverage, если запрос экономический, но данные заведомо недоступны в открытых реестрах: страны с закрытой экономикой без официальной статистики (КНДР / Северная Корея, Эритрея и т.п.), секретные военные расходы, данные теневого рынка
 """.strip()
 
     return [

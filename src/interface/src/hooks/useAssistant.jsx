@@ -134,7 +134,7 @@ export function useAssistant(token, onNewTask) {
         activeTaskIdRef.current = taskId;
 
         try {
-            await fetchEventSource(`http://localhost:8000/api/v1/stream/${taskId}`, {
+            await fetchEventSource(`/api/v1/stream/${taskId}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 signal: ctrl.signal,
                 onmessage(msg) {

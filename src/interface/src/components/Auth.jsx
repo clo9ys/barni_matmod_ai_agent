@@ -33,7 +33,7 @@ export default function Auth({ onLogin }) {
             if (isLoginMode) {
                 await loginUser(username, password);
             } else {
-                const res = await fetch(`http://localhost:8000/api/v1/auth/register?username=${username}&password=${password}`, {
+                const res = await fetch(`/api/v1/auth/register?username=${username}&password=${password}`, {
                     method: 'POST'
                 });
 

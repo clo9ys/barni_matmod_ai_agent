@@ -152,6 +152,9 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             if extracted_params.get("query_type") == "no_data":
                 sync_push({"type": "error", "message": "Тема вне компетенции агента."})
                 return
+            if extracted_params.get("query_type") == "no_coverage":
+                sync_push({"type": "error", "message": "По данной теме данные в реестре отсутствуют."})
+                return
 
             questions = extracted_params.get("clarifying_questions", [])
             sync_push({"type": "step_update", "step": 1, "artifact": {

@@ -26,7 +26,7 @@ const Sidebar = forwardRef(({ token, currentSessionId, onLogout, onHistoryClick,
         if (!window.confirm("Удалить это исследование?")) return;
 
         try {
-            const res = await fetch(`http://localhost:8000/api/v1/research/${sessionId}`, {
+            const res = await fetch(`/api/v1/research/${sessionId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
