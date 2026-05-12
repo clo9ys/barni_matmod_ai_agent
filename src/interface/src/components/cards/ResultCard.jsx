@@ -36,7 +36,7 @@ export default function ResultCard({ data }) {
             {plots.filter(url => !imgErrors[url]).map((url, i) => (
                 <div key={i} className="card">
                     <div className="card-header">
-                        <h4 style={{ color: '#e0e0e0' }}>График {i + 1}</h4>
+                        <h4 style={{ color: '#111827' }}>График {i + 1}</h4>
                     </div>
                     <div className="card-body" style={{ padding: '12px' }}>
                         <img
@@ -52,7 +52,7 @@ export default function ResultCard({ data }) {
             {preview_rows.length > 0 && (
                 <div className="card">
                     <div className="card-header">
-                        <h4 style={{ color: '#e0e0e0' }}>Предпросмотр данных</h4>
+                        <h4 style={{ color: '#111827' }}>Предпросмотр данных</h4>
                     </div>
                     <div className="card-body" style={{ padding: '0', overflowX: 'auto' }}>
                         <table style={{
@@ -67,10 +67,10 @@ export default function ResultCard({ data }) {
                                         <th key={col} style={{
                                             padding: '8px 12px',
                                             textAlign: 'left',
-                                            borderBottom: '1px solid rgba(255,255,255,0.12)',
-                                            color: '#deff9a',
+                                            borderBottom: '1px solid rgba(0,0,0,0.08)',
+                                            color: 'var(--color-soft-accent)',
                                             whiteSpace: 'nowrap',
-                                            background: 'rgba(255,255,255,0.03)',
+                                            background: 'rgba(0,0,0,0.02)',
                                         }}>
                                             {col}
                                         </th>
@@ -79,11 +79,11 @@ export default function ResultCard({ data }) {
                             </thead>
                             <tbody>
                                 {preview_rows.map((row, ri) => (
-                                    <tr key={ri} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                                    <tr key={ri} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
                                         {preview_columns.map(col => (
                                             <td key={col} style={{
                                                 padding: '6px 12px',
-                                                color: '#c8c8c8',
+                                                color: '#111827',
                                                 whiteSpace: 'nowrap',
                                             }}>
                                                 {row[col] ?? ''}

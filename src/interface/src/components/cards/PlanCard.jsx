@@ -8,67 +8,57 @@ const STRATEGY_LABELS = {
 };
 
 export default function PlanCard({ data }) {
-    if (!data) return <p className="dimmed">Загрузка плана...</p>;
+    if (!data) return <p className="text-soft-muted text-sm">Загрузка плана...</p>;
 
     const { combination_strategy, join_key, output_columns, sources = [] } = data;
 
     return (
-        <div className="card">
-            <h3 className="card-title">План сборки данных</h3>
+        <div className="card space-y-6">
+            <h3 className="text-lg font-bold text-soft-text">План сборки данных</h3>
 
-            <div style={{ display: 'flex', gap: '24px', marginBottom: '16px', flexWrap: 'wrap' }}>
+            <div className="flex gap-8 flex-wrap">
                 {combination_strategy && (
                     <div>
-                        <div style={{ fontSize: '11px', color: '#888', marginBottom: '4px', textTransform: 'uppercase' }}>Стратегия</div>
-                        <div style={{ color: '#deff9a', fontWeight: 600 }}>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-soft-muted mb-1">Стратегия</div>
+                        <div className="text-sm font-semibold text-soft-accent">
                             {STRATEGY_LABELS[combination_strategy] || combination_strategy}
                         </div>
                     </div>
                 )}
                 {join_key && (
                     <div>
-                        <div style={{ fontSize: '11px', color: '#888', marginBottom: '4px', textTransform: 'uppercase' }}>Ключ объединения</div>
-                        <div style={{ color: '#e0e0e0', fontFamily: 'monospace' }}>{join_key}</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-soft-muted mb-1">Ключ объединения</div>
+                        <div className="text-sm font-mono text-soft-text">{join_key}</div>
                     </div>
                 )}
             </div>
 
             {sources.length > 0 && (
-                <div style={{ marginBottom: '16px' }}>
-                    <div style={{ fontSize: '11px', color: '#888', marginBottom: '8px', textTransform: 'uppercase' }}>Источники данных</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-soft-muted mb-3">Источники данных</div>
+                    <div className="flex flex-col gap-2">
                         {sources.map((src, i) => (
-                            <div key={i} style={{
-                                background: 'rgba(255,255,255,0.04)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '8px',
-                                padding: '10px 14px',
-                            }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                            <div key={i} className="bg-soft-bg border border-soft-border rounded-xl px-4 py-3">
+                                <div className="flex justify-between items-start gap-3">
                                     <div>
-                                        <div style={{ fontSize: '13px', color: '#deff9a', fontFamily: 'monospace', marginBottom: '4px' }}>
+                                        <div className="text-sm font-mono font-semibold text-soft-accent mb-1">
                                             {src.dataset_id}
                                         </div>
                                         {src.indicator && (
-                                            <div style={{ fontSize: '13px', color: '#e0e0e0' }}>{src.indicator}</div>
+                                            <div className="text-sm text-soft-text">{src.indicator}</div>
                                         )}
                                     </div>
                                     {src.role && src.role !== 'primary' && (
-                                        <span style={{
-                                            fontSize: '11px',
-                                            color: '#aaa',
-                                            border: '1px solid rgba(255,255,255,0.15)',
-                                            borderRadius: '4px',
-                                            padding: '2px 7px',
-                                            whiteSpace: 'nowrap',
-                                        }}>
+                                        <span className="text-[11px] text-soft-muted border border-soft-border rounded px-2 py-0.5 whitespace-nowrap">
                                             {src.role}
                                         </span>
                                     )}
                                 </div>
                                 {src.years && (
-                                    <div style={{ fontSize: '12px', color: '#888', marginTop: '6px' }}>
-                                        Годы: {Array.isArray(src.years) ? `${src.years[0]}–${src.years[src.years.length - 1]} (${src.years.length} лет)` : src.years}
+                                    <div className="text-xs text-soft-muted mt-1.5">
+                                        Годы: {Array.isArray(src.years)
+                                            ? `${src.years[0]}–${src.years[src.years.length - 1]} (${src.years.length} лет)`
+                                            : src.years}
                                     </div>
                                 )}
                             </div>
@@ -79,18 +69,10 @@ export default function PlanCard({ data }) {
 
             {output_columns && output_columns.length > 0 && (
                 <div>
-                    <div style={{ fontSize: '11px', color: '#888', marginBottom: '8px', textTransform: 'uppercase' }}>Итоговые колонки</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-soft-muted mb-3">Итоговые колонки</div>
+                    <div className="flex flex-wrap gap-2">
                         {output_columns.map((col, i) => (
-                            <span key={i} style={{
-                                background: 'rgba(222,255,154,0.1)',
-                                border: '1px solid rgba(222,255,154,0.25)',
-                                color: '#deff9a',
-                                borderRadius: '5px',
-                                padding: '3px 9px',
-                                fontSize: '12px',
-                                fontFamily: 'monospace',
-                            }}>
+                            <span key={i} className="bg-soft-accent/10 border border-soft-accent/20 text-soft-accent rounded-md px-2.5 py-1 text-xs font-mono">
                                 {typeof col === 'object' ? (col.name || JSON.stringify(col)) : col}
                             </span>
                         ))}
