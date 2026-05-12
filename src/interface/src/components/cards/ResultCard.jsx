@@ -40,7 +40,7 @@ export default function ResultCard({ data }) {
                     </div>
                     <div className="card-body" style={{ padding: '12px' }}>
                         <img
-                            src={`http://localhost:8000${url}`}
+                            src={`${url}`}
                             alt={`График ${i + 1}`}
                             style={{ width: '100%', borderRadius: '6px', display: 'block' }}
                             onError={() => setImgErrors(prev => ({ ...prev, [url]: true }))}

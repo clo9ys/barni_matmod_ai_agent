@@ -1,18 +1,16 @@
 services:
-  app:
+  barni-assistant:
     build: .
+    container_name: barni-assistant
     ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    environment:
-      ARCHIVE_ROOT: /app/data/archive
+      - "80:8000"
     volumes:
       - ./data:/app/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    restart: always
+
+volumes:
+  data:
+  logs:
