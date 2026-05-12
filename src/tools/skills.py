@@ -27,13 +27,19 @@ def filter_years(
     return df[df[year_col].isin(years)].reset_index(drop=True)
 
 
+def _drop_duplicate_cols(left: pd.DataFrame, right: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
+    """Drop columns from right that already exist in left (excluding join keys)."""
+    overlap = set(left.columns) & set(right.columns) - set(keys)
+    return right.drop(columns=list(overlap)) if overlap else right
+
+
 def join_on_year(*dfs: pd.DataFrame, how: str = "outer") -> pd.DataFrame:
     """Outer-join multiple DataFrames on the 'year' column."""
     if not dfs:
         return pd.DataFrame()
     result = dfs[0]
     for df in dfs[1:]:
-        result = result.merge(df, on="year", how=how)
+        result = result.merge(_drop_duplicate_cols(result, df, ["year"]), on="year", how=how)
     return result.sort_values("year").reset_index(drop=True)
 
 
@@ -48,7 +54,7 @@ def join_on_country_year(
     keys = [country_col, "year"]
     result = dfs[0]
     for df in dfs[1:]:
-        result = result.merge(df, on=keys, how=how)
+        result = result.merge(_drop_duplicate_cols(result, df, keys), on=keys, how=how)
     return result.sort_values(keys).reset_index(drop=True)
 
 
