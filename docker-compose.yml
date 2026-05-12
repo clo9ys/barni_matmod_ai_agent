@@ -1,6 +1,9 @@
 services:
   barni-assistant:
-    build: .
+    build:
+      context: .
+      args:
+        BUILDKIT_INLINE_CACHE: "1"
     container_name: barni-assistant
     ports:
       - "80:8000"
@@ -10,7 +13,3 @@ services:
     env_file:
       - .env
     restart: always
-
-volumes:
-  data:
-  logs:
