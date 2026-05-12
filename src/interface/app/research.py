@@ -127,7 +127,7 @@ def _execute_script(code: str, session_id: str, sync_push) -> dict | bool:
     }
 
 
-def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.AbstractEventLoop):
+def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.AbstractEventLoop, skip_clarification: bool = False):
     def sync_push(data: dict):
         if task_id in event_queues:
             queue, main_loop = event_queues[task_id]
@@ -161,7 +161,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 "questions": questions,
             }})
 
-            if questions:
+            if questions and not skip_clarification:
                 sync_push({"type": "awaiting_clarification"})
                 return
 
@@ -265,6 +265,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
 async def init_chat(request: Request, background_tasks: BackgroundTasks, user: User = Depends(get_current_user), db: Session = Depends(get_session)):
     body = await request.json()
     query = body.get("query")
+    skip_clarification = bool(body.get("skip_clarification", False))
     task_id = str(uuid.uuid4())
     main_loop = asyncio.get_running_loop()
 
@@ -274,7 +275,7 @@ async def init_chat(request: Request, background_tasks: BackgroundTasks, user: U
     db.add(new_research)
     db.commit()
 
-    background_tasks.add_task(run_agent_worker, task_id, query, user.id, main_loop)
+    background_tasks.add_task(run_agent_worker, task_id, query, user.id, main_loop, skip_clarification)
     return {"task_id": task_id}
 
 

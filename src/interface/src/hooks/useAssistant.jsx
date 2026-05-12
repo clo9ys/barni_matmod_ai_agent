@@ -246,7 +246,7 @@ export function useAssistant(token, onNewTask) {
             const response = await fetch('http://localhost:8000/api/v1/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ query: combinedQuery })
+                body: JSON.stringify({ query: combinedQuery, skip_clarification: true })
             });
             if (!response.ok) throw new Error('Ошибка запуска');
             const { task_id, session_id } = await response.json();
