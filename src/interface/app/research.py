@@ -153,12 +153,17 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 sync_push({"type": "error", "message": "Тема вне компетенции агента."})
                 return
 
+            questions = extracted_params.get("clarifying_questions", [])
             sync_push({"type": "step_update", "step": 1, "artifact": {
                 "geography": ", ".join(extracted_params.get("geography", [])),
                 "timeframe": _timeframe_str(extracted_params),
                 "perspective": extracted_params.get("subject_area", "Экономика"),
-                "questions": extracted_params.get("clarifying_questions", []),
+                "questions": questions,
             }})
+
+            if questions:
+                sync_push({"type": "awaiting_clarification"})
+                return
 
             # ШАГ 2 — поиск датасетов
             sync_push({"type": "log", "message": "🔍 Поиск в реестре НЦСЭД..."})

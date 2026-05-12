@@ -8,6 +8,7 @@ export function useAssistant(token, onNewTask) {
     const [logs, setLogs] = useState([{ text: 'Ожидание запроса...', type: 'dimmed' }]);
     const [artifacts, setArtifacts] = useState({});
     const [isProcessing, setIsProcessing] = useState(false);
+    const [awaitingClarification, setAwaitingClarification] = useState(false);
     const [initialQuery, setInitialQuery] = useState('');
     const [sessionId, setSessionId] = useState(null);
 
@@ -42,6 +43,7 @@ export function useAssistant(token, onNewTask) {
         setArtifacts({});
         setInitialQuery('');
         setIsProcessing(false);
+        setAwaitingClarification(false);
         setSessionId(null);
     }, [_abortActive, _cancelActiveWorker]);
 
@@ -139,7 +141,11 @@ export function useAssistant(token, onNewTask) {
                     if (!msg.data) return;
                     try {
                         const data = JSON.parse(msg.data);
-                        if (data.type === 'log') {
+                        if (data.type === 'awaiting_clarification') {
+                            setIsProcessing(false);
+                            setAwaitingClarification(true);
+                            setLogs(prev => [...prev, { text: '❓ Ответьте на уточняющие вопросы чтобы продолжить', type: 'normal' }]);
+                        } else if (data.type === 'log') {
                             setLogs(prev => [...prev, { text: data.message, type: 'normal' }]);
                         } else if (data.type === 'step_update') {
                             setCurrentStep(data.step);
@@ -149,11 +155,13 @@ export function useAssistant(token, onNewTask) {
                             }
                         } else if (data.type === 'done') {
                             setIsProcessing(false);
+                            setAwaitingClarification(false);
                             setLogs(prev => [...prev, { text: 'Анализ завершен', type: 'dimmed' }]);
                             activeTaskIdRef.current = null;
                             ctrl.abort();
                         } else if (data.type === 'error') {
                             setIsProcessing(false);
+                            setAwaitingClarification(false);
                             setLogs(prev => [...prev, { text: `Ошибка: ${data.message}`, type: 'error' }]);
                             activeTaskIdRef.current = null;
                             ctrl.abort();
@@ -187,6 +195,7 @@ export function useAssistant(token, onNewTask) {
         _cancelActiveWorker();
 
         setIsProcessing(true);
+        setAwaitingClarification(false);
         setInitialQuery(message);
         setLogs([{ text: 'Запуск задачи...', type: 'normal' }]);
         setArtifacts({});
@@ -215,11 +224,49 @@ export function useAssistant(token, onNewTask) {
         }
     }, [token, _subscribeToStream, _abortActive, _cancelActiveWorker, onNewTask]);
 
+    const sendClarification = useCallback(async (answer) => {
+        if (!answer.trim()) return;
+        const combinedQuery = `${initialQuery}\n\nОтветы на уточняющие вопросы: ${answer}`;
+
+        _abortActive();
+        _cancelActiveWorker();
+
+        setAwaitingClarification(false);
+        setIsProcessing(true);
+        setLogs(prev => [...prev, { text: `📝 Уточнение отправлено`, type: 'normal' }]);
+        setArtifacts(prev => {
+            const next = { ...prev };
+            for (let s = 2; s <= 6; s++) delete next[s];
+            return next;
+        });
+        setCurrentStep(1);
+        setViewStep(1);
+
+        try {
+            const response = await fetch('http://localhost:8000/api/v1/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ query: combinedQuery })
+            });
+            if (!response.ok) throw new Error('Ошибка запуска');
+            const { task_id, session_id } = await response.json();
+            setSessionId(session_id || task_id);
+            setCurrentSessionId(task_id);
+            if (onNewTask) onNewTask();
+            await _subscribeToStream(task_id);
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                setLogs(prev => [...prev, { text: `Ошибка: ${error.message}`, type: 'error' }]);
+                setIsProcessing(false);
+            }
+        }
+    }, [initialQuery, token, _subscribeToStream, _abortActive, _cancelActiveWorker, onNewTask]);
+
     return {
         currentSessionId,
         currentStep, viewStep, setViewStep,
-        logs, artifacts, isProcessing,
+        logs, artifacts, isProcessing, awaitingClarification,
         initialQuery, sessionId,
-        sendMessage, loadResearch, resetAssistant
+        sendMessage, sendClarification, loadResearch, resetAssistant
     };
 }
