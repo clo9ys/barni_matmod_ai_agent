@@ -27,14 +27,9 @@ export default function App() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
-    if (awaitingClarification) {
-        sendClarification(inputValue);
-        setInputValue('');
-    } else if (!isProcessing) {
-        sendMessage(inputValue);
-        setInputValue('');
-    }
+    if (!inputValue.trim() || isProcessing || awaitingClarification) return;
+    sendMessage(inputValue);
+    setInputValue('');
   };
 
   return (
@@ -63,6 +58,8 @@ export default function App() {
                   step={viewStep}
                   data={artifacts[viewStep]}
                   query={initialQuery}
+                  awaitingClarification={awaitingClarification}
+                  onClarify={sendClarification}
               />
             </section>
           </div>
@@ -72,8 +69,8 @@ export default function App() {
                 <div className="relative group">
                     <textarea
                         rows="2"
-                        placeholder={awaitingClarification ? "Ответьте на уточняющие вопросы..." : "Например: Собери динамику инфляции по странам ЕС за последние 5 лет..."}
-                        className={`w-full bg-soft-bg border rounded-xl p-4 pr-32 text-sm focus:ring-2 outline-none transition-all resize-none shadow-sm ${awaitingClarification ? 'border-amber-400 focus:ring-amber-400/20 focus:border-amber-500' : 'border-soft-border focus:ring-soft-accent/20 focus:border-soft-accent'}`}
+                        placeholder="Например: Собери динамику инфляции по странам ЕС за последние 5 лет..."
+                        className="w-full bg-soft-bg border border-soft-border rounded-xl p-4 pr-32 text-sm focus:ring-2 focus:ring-soft-accent/20 focus:border-soft-accent outline-none transition-all resize-none shadow-sm"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => {
@@ -82,21 +79,19 @@ export default function App() {
                                 handleSubmit(e);
                             }
                         }}
-                        disabled={isProcessing && !awaitingClarification}
+                        disabled={isProcessing || awaitingClarification}
                     />
                     <div className="absolute right-3 bottom-3">
                         <button
                             type="submit"
                             className="btn-primary flex items-center gap-2 text-sm font-semibold h-10 px-6"
-                            disabled={isProcessing && !awaitingClarification}
+                            disabled={isProcessing || awaitingClarification}
                         >
-                            {isProcessing && !awaitingClarification ? (
+                            {isProcessing ? (
                                 <>
                                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     Думаю...
                                 </>
-                            ) : awaitingClarification ? (
-                                'Ответить'
                             ) : (
                                 'Отправить'
                             )}
