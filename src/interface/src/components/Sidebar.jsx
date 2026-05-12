@@ -5,7 +5,7 @@ const Sidebar = forwardRef(({ token, currentSessionId, onLogout, onHistoryClick,
 
     const fetchHistory = async () => {
         try {
-            const res = await fetch('http://localhost:8000/api/v1/history', {
+            const res = await fetch('/api/v1/history', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {

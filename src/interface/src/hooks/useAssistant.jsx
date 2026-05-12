@@ -25,7 +25,7 @@ export function useAssistant(token, onNewTask) {
     const _cancelActiveWorker = useCallback(() => {
         const tid = activeTaskIdRef.current;
         if (tid) {
-            fetch(`http://localhost:8000/api/v1/stream/${tid}/cancel`, {
+            fetch(`/api/v1/stream/${tid}/cancel`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
             }).catch(() => {});
@@ -52,7 +52,7 @@ export function useAssistant(token, onNewTask) {
         _cancelActiveWorker();
         setIsProcessing(true);
         try {
-            const res = await fetch(`http://localhost:8000/api/v1/research/${sid}`, {
+            const res = await fetch(`/api/v1/research/${sid}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -207,7 +207,7 @@ export function useAssistant(token, onNewTask) {
         setCurrentSessionId(null);
 
         try {
-            const response = await fetch('http://localhost:8000/api/v1/chat', {
+            const response = await fetch('/api/v1/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ query: message })
@@ -245,7 +245,7 @@ export function useAssistant(token, onNewTask) {
         setViewStep(1);
 
         try {
-            const response = await fetch('http://localhost:8000/api/v1/chat', {
+            const response = await fetch('/api/v1/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ query: combinedQuery, skip_clarification: true })
