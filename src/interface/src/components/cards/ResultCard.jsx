@@ -22,7 +22,7 @@ export default function ResultCard({ data }) {
                     <p className="text-soft-text mb-8 leading-relaxed">{message}</p>
                     {file_url && (
                         <a
-                            href={`http://localhost:8000${file_url}`}
+                            href={file_url}
                             download
                             className="inline-flex items-center gap-3 px-8 py-4 bg-soft-accent text-white rounded-xl font-bold shadow-lg shadow-soft-accent/20 hover:bg-sky-600 hover:-translate-y-0.5 transition-all"
                         >
