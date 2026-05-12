@@ -136,6 +136,12 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
     with Session(engine) as db:
         db_state = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
 
+        def push_error(message: str):
+            sync_push({"type": "error", "message": message})
+            if db_state:
+                db_state.errors = (db_state.errors or []) + [message]
+                db.add(db_state); db.commit()
+
         try:
             if not is_llm_configured():
                 raise RuntimeError("LLM не настроена. Укажите AI_API_KEY и AI_MODEL в .env")
@@ -150,10 +156,10 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 db.add(db_state); db.commit()
 
             if extracted_params.get("query_type") == "no_data":
-                sync_push({"type": "error", "message": "Тема вне компетенции агента."})
+                push_error("Тема вне компетенции агента.")
                 return
             if extracted_params.get("query_type") == "no_coverage":
-                sync_push({"type": "error", "message": "По данной теме данные в реестре отсутствуют."})
+                push_error("По данной теме данные в реестре отсутствуют.")
                 return
 
             questions = extracted_params.get("clarifying_questions", [])
@@ -179,7 +185,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             top_datasets = rerank_datasets(english_query or query, _merge_candidates(candidates_ru, candidates_en), top_k=5)
 
             if not top_datasets or max((d.get("rerank_score", 0.0) for d in top_datasets), default=0.0) < NO_DATA_RERANK_THRESHOLD:
-                sync_push({"type": "error", "message": "Релевантные данные не найдены."})
+                push_error("Релевантные данные не найдены.")
                 return
 
             sync_push({"type": "step_update", "step": 2, "artifact": {
@@ -229,11 +235,11 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             if archive_root:
                 errors = validate_assembly_plan(assembly_plan, archive_root=archive_root)
                 if errors:
-                    sync_push({"type": "error", "message": f"Ошибка валидации плана: {errors}"})
+                    push_error(f"Ошибка валидации плана: {errors}")
                     return
 
             if not assembly_plan.get("primary_sources"):
-                sync_push({"type": "error", "message": "Не удалось определить источники данных. Попробуйте уточнить запрос."})
+                push_error("Не удалось определить источники данных. Попробуйте уточнить запрос.")
                 return
 
             sync_push({"type": "step_update", "step": 4, "artifact": _plan_artifact(assembly_plan)})
@@ -259,7 +265,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             sync_push({"type": "done"})
 
         except Exception as e:
-            sync_push({"type": "error", "message": str(e)})
+            push_error(str(e))
         finally:
             if task_id in event_queues:
                 del event_queues[task_id]
@@ -286,13 +292,24 @@ async def init_chat(request: Request, background_tasks: BackgroundTasks, user: U
 @router.get("/stream/{task_id}")
 async def stream_task(request: Request, task_id: str, db: Session = Depends(get_session)):
     async def event_generator():
+        # Ждём до 2с — воркер мог завершиться до подключения SSE
+        for _ in range(20):
+            if task_id in event_queues:
+                break
+            await asyncio.sleep(0.1)
+
         if task_id not in event_queues:
             task = db.exec(select(ResearchTable).where(ResearchTable.session_id == task_id)).first()
-            if task and task.current_step >= 6 and task.result_data:
+            if not task:
+                yield {"data": json.dumps({"type": "error", "message": "Задача не найдена"})}
+                return
+            if task.current_step >= 6 and task.result_data:
                 yield {"data": json.dumps({"type": "step_update", "step": 6, "artifact": task.result_data}, ensure_ascii=False)}
                 yield {"data": json.dumps({"type": "done"})}
+            elif task.errors:
+                yield {"data": json.dumps({"type": "error", "message": task.errors[-1]})}
             else:
-                yield {"data": json.dumps({"type": "error", "message": "Task not found"})}
+                yield {"data": json.dumps({"type": "error", "message": "Соединение потеряно, попробуйте снова"})}
             return
         queue, _ = event_queues[task_id]
         try:
