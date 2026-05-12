@@ -240,7 +240,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
             code = generate_analysis_code(query, research_design, top_datasets, archive_root=archive_root, assembly_plan=assembly_plan)
             if db_state:
                 db_state.generated_script = code
-                db_state.current_step = 6
+                db_state.current_step = 5
                 db.add(db_state); db.commit()
             sync_push({"type": "step_update", "step": 5, "artifact": {"code": code}})
 
@@ -250,6 +250,7 @@ def run_agent_worker(task_id: str, query: str, user_id: int, loop: asyncio.Abstr
                 return
             if db_state:
                 db_state.result_data = result_data
+                db_state.current_step = 6
                 db.add(db_state); db.commit()
             sync_push({"type": "step_update", "step": 6, "artifact": result_data})
             sync_push({"type": "done"})

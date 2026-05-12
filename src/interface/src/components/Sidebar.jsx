@@ -78,8 +78,8 @@ const Sidebar = forwardRef(({ token, currentSessionId, onLogout, onHistoryClick,
                                 }`}
                                 onClick={() => onHistoryClick(item.session_id)}
                             >
-                                <span className="block text-[10px] font-bold text-soft-accent mb-1">
-                                    ШАГ {item.current_step}/7
+                                <span className={`block text-[10px] font-bold mb-1 ${item.current_step === 6 ? 'text-green-500' : 'text-soft-accent'}`}>
+                                    {item.current_step === 6 ? '✓ Завершено' : `ШАГ ${item.current_step}/6`}
                                 </span>
                                 <span className={`block text-sm truncate transition-colors ${
                                     isActive ? 'text-soft-accent font-medium' : 'text-soft-text group-hover:text-soft-accent'
